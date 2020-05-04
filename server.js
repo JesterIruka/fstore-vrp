@@ -11,7 +11,7 @@ pool.getConnection((err, link) => {
   else {
     link.query("CREATE TABLE IF NOT EXISTS fstore_online (id BIGINT)");
     link.query("TRUNCATE fstore_online");
-    console.log('[FSTORE] Script inicializado com state '+link.stat);
+    console.log('[FSTORE] Script inicializado com state '+link.state);
   }
 });
 
