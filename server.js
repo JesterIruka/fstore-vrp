@@ -26,7 +26,7 @@ function sql(line, values=[]) {
 }
 
 on("vRP:playerJoin", function (user_id,source,name) {
-  sql("INSERT INTO fstore_online (id) VALUES (?)", [user_id]);
+  sql("REPLACE INTO fstore_online (id) VALUES (?)", [user_id]);
 });
 
 on("vRP:playerLeave", function (user_id,source) {
