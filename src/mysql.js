@@ -10,8 +10,12 @@ module.exports.ping = (cb) => {
 };
 
 module.exports.connect = () => (new Promise((resolve) => {
-  connection = mysql.createConnection(config.mysql);
-  connection.connect(err => resolve(err));
+  try {
+    connection = mysql.createConnection(config.mysql);
+    connection.connect(err => resolve(err));
+  } catch (error) {
+    resolve(error);
+  }
 }));
 
 module.exports.isConnected = () => connection && connection.state == 'connected';

@@ -33,6 +33,7 @@ module.exports.firstAvailableNumber = (array) => {
  * @param {Error} error
  */
 module.exports.printError = (error) => {
-  console.error(error.name, error.message);
+  console.error(error.name);
+  console.error(error.message);
   console.error(Array.isArray(error.stack) ? error.stack.map(JSON.stringify).join('\n') : error);
 }
