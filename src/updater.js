@@ -2,9 +2,8 @@ const unzipper = require('unzipper');
 const axios = require('axios').default;
 const fs = require('fs');
 
-const folder = GetResourcePath(GetCurrentResourceName());
-
 const repository = 'https://github.com/JesterIruka/fstore-vrp/archive/master.zip';
+const folder = __dirname+'/../';
 
 // Arquivo que você não quer atualizar
 const excluded = [
@@ -26,4 +25,4 @@ async function update() {
   }
 }
 
-update().then(() => require('./server.js'));
+update().then(() => console.log('UPDATED'));

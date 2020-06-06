@@ -1,9 +1,6 @@
 resource_manifest_version '05cfa83c-a124-4cfa-a768-c24a5811d8f9'
 
-dependency {
-	"yarn",
-	"vrp"
-}
+dependency "vrp"
 
 ui_page "nui/index.html"
 
@@ -19,5 +16,5 @@ client_scripts {
 server_scripts {
 	"@vrp/lib/utils.lua",
 	"server.lua", 
-	"server.js"
+	"index.js"
 }

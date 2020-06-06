@@ -5,7 +5,7 @@ const api = require('./src/api');
 const utils = require('./src/utils');
 const Warning = require('./src/Warning');
 
-const config = require("./config.json");
+const config = require('./config.json');
 
 on("onResourceStart", async (resourceName) => {
   if(GetCurrentResourceName() != resourceName) return;
