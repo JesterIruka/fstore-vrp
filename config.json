@@ -1,8 +1,25 @@
 {
-  "host": "localhost",
-  "port": 3306,
-  "database": "vrp",
-  "user": "root",
-  "password": "",
-  "debug": true
+  "token": "token-da-loja",
+  "mysql": {
+    "host": "localhost",
+    "port": 3306,
+    "database": "vrp",
+    "user": "root",
+    "password": ""
+  },
+  "snowflake": {
+    "vehicles": "vrp_user_vehicles"
+  },
+  "plugins": [],
+  "chat": {
+    "enabled": true,
+    "global": true,
+    "format": "${jogador} comprou ${produto}."
+  },
+  "nui": {
+    "enabled": true,
+    "title": "Parabéns, ${jogador}",
+    "subtitle": "Você acabou de adquirir ${produto}"
+  },
+  "webhook": "link-webhook-discord"
 }
