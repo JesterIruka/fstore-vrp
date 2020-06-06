@@ -194,4 +194,4 @@ function sendTitle(source, jogador, produto) {
   }
 }
 
-start();
+start().catch(utils.printError);
