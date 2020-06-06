@@ -10,6 +10,7 @@ const excluded = [
   '/config.json',
   '/nui/index.css',
   '/nui/index.html',
+  '/Instalar.bat'
 ];
 
 async function update() {
