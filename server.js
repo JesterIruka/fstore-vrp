@@ -7,9 +7,7 @@ const Warning = require('./src/Warning');
 
 const config = require('./config.json');
 
-on("onResourceStart", async (resourceName) => {
-  if(GetCurrentResourceName() != resourceName) return;
-
+async function start() {
   console.log('Conectando no banco de dados...');
 
   let error = undefined;
@@ -37,7 +35,7 @@ on("onResourceStart", async (resourceName) => {
   await database.createAppointmentsTable();
   await coroutine();
   setInterval(coroutine, 60000);
-});
+}
 
 async function fetch() {
   const sales = await api.packages();
@@ -195,3 +193,5 @@ function sendTitle(source, jogador, produto) {
     });
   }
 }
+
+start();
