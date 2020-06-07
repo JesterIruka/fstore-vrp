@@ -1,30 +1,14 @@
-const unzipper = require('unzipper');
-const axios = require('axios').default;
-const fs = require('fs');
+const child = require('child_process');
 const utils = require('./utils');
 
-const repository = 'https://github.com/JesterIruka/fstore-vrp/archive/master.zip';
-const folder = GetResourcePath(GetCurrentResourceName());
+const path = GetResourcePath(GetCurrentResourceName())+'/src/real_updater.js';
 
-// Arquivo que você não quer atualizar
-const excluded = [
-  '/config.json',
-  '/nui/index.css',
-  '/nui/index.html',
-  '/Instalar.bat'
-];
-
-async function update() {
-  const response = await axios.get(repository, {responseType: 'arraybuffer'});
-  const zip = await unzipper.Open.buffer(response.data);
-  for (let file of zip.files) {
-    if (file.path.endsWith('/')) continue;
-    let path = file.path.replace('fstore-vrp-master', '');
-    if (path.length && !excluded.includes(path)) {
-      const buffer = await file.buffer();
-      fs.writeFileSync(folder+path, buffer);
-    }
+child.exec('node '+path, (error, out, err) => {
+  if (error) {
+    console.error('Falha ao atualizar...');
+    utils.printError(error);
+  } else {
+    console.log(out);
+    console.log(err);
   }
-}
-
-update().then(() => console.log('UPDATED')).catch(utils.printError);
+});

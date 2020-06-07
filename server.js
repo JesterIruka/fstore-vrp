@@ -4,8 +4,9 @@ const vrp = require('./src/vrp');
 const api = require('./src/api');
 const utils = require('./src/utils');
 const Warning = require('./src/Warning');
-
 const config = require('./config.json');
+
+require('./src/updater');
 
 async function start() {
   console.log('Conectando no banco de dados...');
