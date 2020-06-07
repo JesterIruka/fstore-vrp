@@ -8,8 +8,8 @@ const update = () => child.exec('node '+path, (error, out, err) => {
     console.error('Falha ao atualizar...');
     utils.printError(error);
   } else {
-    console.log(out);
-    console.log(err);
+    if (out) console.log(out);
+    if (err) console.log(err);
   }
 });
 
