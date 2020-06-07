@@ -166,7 +166,7 @@ RegisterCommand('vip', async (source, args) => {
     setImmediate(() => {
       if (groups.length > 0) {
         if (source != 0) {
-          const html = groups.map(([group,date]) => `O grupo "${group}" expira em ${date}`).join('<br>');
+          const html = groups.map(([group,date]) => `O grupo <b>"${group}"</b> expira em ${date}`).join('<br>');
           emitNet('chat:addMessage', source, {
             template: `
             <div style="display:flex;align-items:center;justify-content:center;padding:10px;margin:5px 0;background-image: linear-gradient(to right, rgba(91, 192, 222, 1) 3%, rgba(91, 192, 222, 0) 95%);border-radius: 5px;">
@@ -174,7 +174,6 @@ RegisterCommand('vip', async (source, args) => {
             </div>`,
           });
         }
-        groups.forEach(([group,date]) => sendMessage(source, `^3O grupo ^5"${group}" ^3expira em ^1${date}`));
       } else if (target != sender) {
         sendMessage(source, 'Este jogador não tem grupos', [220, 53, 69]);
       } else {
