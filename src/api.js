@@ -35,7 +35,7 @@ api.players = (online) => endpoint.patch(`/players`, { online });
 
 api.addWebhookBatch = (content) => {
   batch.push(content);
-  if (hasWebhook && content.join('\n').length > 1800) {
+  if (hasWebhook && batch.join('\n').length >= 1750) {
     api.sendWebhookBatch();
     batch.push('Continuação...');
   }
