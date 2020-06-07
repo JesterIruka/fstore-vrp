@@ -34,11 +34,11 @@ api.delivery = (ids) => endpoint.get(`/delivery?ids=${ids.join(',')}`);
 api.players = (online) => endpoint.patch(`/players`, { online });
 
 api.addWebhookBatch = (content) => {
-  batch.push(content);
   if (hasWebhook && batch.join('\n').length >= 1750) {
     api.sendWebhookBatch();
     batch.push('Continuação...');
   }
+  batch.push(content);
 }
 
 api.sendWebhook = (content, color) => {
