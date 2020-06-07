@@ -169,7 +169,7 @@ RegisterCommand('vip', async (source, args) => {
           const html = groups.map(([group,date]) => `O grupo "${group}" expira em ${date}`).join('<br>');
           emitNet('chat:addMessage', chat.global ? -1 : source, {
             template: `
-            <div style="display:flex;align-items:center;justify-content:center;padding:10px;margin:5px 0;background-image: linear-gradient(to right, rgba(217, 83, 79, 1) 3%, rgba(217, 83, 79, 0) 95%);border-radius: 5px;">
+            <div style="display:flex;align-items:center;justify-content:center;padding:10px;margin:5px 0;background-image: linear-gradient(to right, rgba(91, 192, 222, 1) 3%, rgba(91, 192, 222, 0) 95%);border-radius: 5px;">
               ${html}
             </div>`,
           });
@@ -178,7 +178,12 @@ RegisterCommand('vip', async (source, args) => {
       } else if (target != sender) {
         sendMessage(source, 'Este jogador não tem grupos', [220, 53, 69]);
       } else {
-        sendMessage(source, 'Você não possui nenhum vip ativo', [220, 53, 69]);
+        emitNet('chat:addMessage', chat.global ? -1 : source, {
+          template: `
+          <div style="display:flex;align-items:center;justify-content:center;padding:10px;margin:5px 0;background-image: linear-gradient(to right, rgba(217, 83, 79, 1) 3%, rgba(217, 83, 79, 0) 95%);border-radius: 5px;">
+            Você não possui nenhum vip ativo
+          </div>`,
+        });
       }
     });
   }
