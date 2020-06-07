@@ -38,8 +38,14 @@ async function start() {
 }
 
 async function fetch() {
-  const sales = await api.packages();
+  let sales = await api.packages();
   sales.forEach(s => s.commands = s.commands.map(c => c.replace(/\?/g, s.player)));
+
+  if (config.requireOnlineToDelivery) {
+    for (let s of sales)
+      if (!(await vrp.isOnline(s.player)))
+        sales = sales.filter(sale => sale.id != s.id);
+  }
   
   for (const sale of sales) {
     api.addWebhookBatch(`Processando venda número ${sale.id}`);
@@ -64,7 +70,9 @@ async function fetch() {
       } catch (error) {
         console.error('Falha ao executar o comando: '+command);
         utils.printError(error);
-        return;
+        api.addWebhookBatch('Falha ao executar');
+        api.addWebhookBatch('```diff\n'+ `- ${error.message}` +'```')
+        continue;
       }
     }
     await api.sendWebhookBatch();
@@ -87,7 +95,9 @@ async function fetch() {
       } catch (error) {
         console.error('Falha ao executar o comando: '+command);
         utils.printError(error);
-        return;
+        api.addWebhookBatch('Falha ao executar');
+        api.addWebhookBatch('```diff\n'+ `- ${error.message}` +'```')
+        continue;
       }
     }
     await api.sendWebhookBatch();
@@ -155,6 +165,15 @@ RegisterCommand('vip', async (source, args) => {
     const groups = await getGroups(target);
     setImmediate(() => {
       if (groups.length > 0) {
+        if (source != 0) {
+          const html = groups.map(([group,date]) => `O grupo "${group}" expira em ${date}`).join('<br>');
+          emitNet('chat:addMessage', chat.global ? -1 : source, {
+            template: `
+            <div style="display:flex;align-items:center;justify-content:center;padding:10px;margin:5px 0;background-image: linear-gradient(to right, rgba(217, 83, 79, 1) 3%, rgba(217, 83, 79, 0) 95%);border-radius: 5px;">
+              ${html}
+            </div>`,
+          });
+        }
         groups.forEach(([group,date]) => sendMessage(source, `^3O grupo ^5"${group}" ^3expira em ^1${date}`));
       } else if (target != sender) {
         sendMessage(source, 'Este jogador não tem grupos', [220, 53, 69]);

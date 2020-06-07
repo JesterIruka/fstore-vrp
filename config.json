@@ -10,6 +10,7 @@
   "snowflake": {
     "vehicles": "vrp_user_vehicles"
   },
+  "requireOnlineToDelivery": false,
   "plugins": [],
   "chat": {
     "enabled": true,
