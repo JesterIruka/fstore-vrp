@@ -11,7 +11,6 @@ local function load_code(code, environment)
   end
 end
 
-
 AddEventHandler('fivemstore-lua', function (exec, callback)
   local context = {}
   context.vRP = vRP

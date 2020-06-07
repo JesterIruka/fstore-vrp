@@ -123,7 +123,8 @@ RegisterCommand('fivemstore', async (source, args) => {
       const toEval = args.join(' ');
       try {
         await eval(toEval);
-        setImmediate(() => sendMessage(source, 'O comando foi executado com sucesso'));
+        if (source != 0) 
+          setImmediate(() => sendMessage(source, 'O comando foi executado com sucesso'));
       } catch (err) {
         utils.printError(err);
       }
