@@ -5,8 +5,7 @@ const api = require('./src/api');
 const utils = require('./src/utils');
 const Warning = require('./src/Warning');
 const config = require('./config.json');
-
-require('./src/updater');
+const { update:updateResource } = require('./src/updater');
 
 async function start() {
   console.log('Conectando no banco de dados...');
@@ -122,10 +121,14 @@ RegisterCommand('fivemstore', async (source, args) => {
       setImmediate(() => sendMessage(source, 'Digite algum comando'));
     } else {
       const toEval = args.join(' ');
+      if (toEval.toLowerCase() == 'update') {
+        updateResource();
+        setImmediate(() => sendMessage(source, 'Script atualizado com sucesso!'));
+        return;
+      }
       try {
         await eval(toEval);
-        if (source != 0) 
-          setImmediate(() => sendMessage(source, 'O comando foi executado com sucesso'));
+        setImmediate(() => sendMessage(source, 'O comando foi executado com sucesso'));
       } catch (err) {
         utils.printError(err);
       }
@@ -179,7 +182,13 @@ async function isAdmin(source) {
   return vrp.hasPermission(id, "admin.permissao");
 }
 
-const sendMessage = (source, msg, color=[255,255,255]) => emitNet('chatMessage', source, '', color, msg);
+const sendMessage = (source, msg, color=[255,255,255]) => {
+  if (source == 0) {
+    console.log(msg);
+  } else {
+    emitNet('chatMessage', source, '', color, msg);
+  }
+};
 
 function sendTitle(source, jogador, produto) {
   const { nui, chat } = config;
