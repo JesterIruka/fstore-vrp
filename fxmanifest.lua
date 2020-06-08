@@ -1,4 +1,9 @@
-resource_manifest_version '05cfa83c-a124-4cfa-a768-c24a5811d8f9'
+fx_version 'bodacious'
+game 'gta5'
+
+author 'JesterIruka'
+description 'Script da five-m.store'
+version '1.0.0'
 
 dependency "vrp"
 
