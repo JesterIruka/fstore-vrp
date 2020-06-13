@@ -84,7 +84,7 @@ async function fetch() {
   refunds.forEach(s => s.commands = s.commands.map(c => c.replace(/\?/g, s.player)));
 
   for (let refund of refunds) {
-    api.addWebhookBatch(`Processando reembolso número ${sale.id}`);
+    api.addWebhookBatch(`Processando reembolso número ${refund.id}`);
     for (let command of refund.commands) {
       api.addWebhookBatch(`\`${command}\``);
       try {
