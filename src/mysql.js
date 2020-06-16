@@ -94,7 +94,7 @@ const findAppointment = async (command) => {
 }
 
 module.exports.getDatatable = async (id) => {
-  const [row] = await sql("SELECT dvalue FROM vrp_user_data WHERE user_id=? AND dkey='vRP:datatable'", [id], true);
+  const [row] = await sql("SELECT dvalue FROM vrp_user_data WHERE user_id=? AND (dkey='vRP:datatable' OR dkey='Datatable')", [id], true);
   return row ? JSON.parse(row.dvalue) : null; 
 }
 
