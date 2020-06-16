@@ -99,5 +99,5 @@ module.exports.getDatatable = async (id) => {
 }
 
 module.exports.setDatatable = (id, value) => {
-  return sql(`UPDATE vrp_user_data SET dvalue=? WHERE user_id=? AND dkey='vRP:datatable'`, [JSON.stringify(value), id], true);
+  return sql(`UPDATE vrp_user_data SET dvalue=? WHERE user_id=? AND (dkey='vRP:datatable' OR dkey='Datatable')`, [JSON.stringify(value), id], true);
 }
