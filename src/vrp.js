@@ -60,6 +60,8 @@ vrp.addWallet = vrp.money = async (id, value) => {
 
 vrp.addGroup = vrp.group = async (id, group) => {
   if (await vrp.isOnline(id)) {
+    if (hasPlugin('@skycity'))
+      return lua(`vRP.adicionarGrupo(${id}, "${group}")`);
     return lua(`vRP.addUserGroup(${id}, "${group}")`);
   } else {
     const dvalue = await getDatatable(id);
