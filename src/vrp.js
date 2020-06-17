@@ -42,6 +42,9 @@ vrp.removePriority = async (id) => {
 
 vrp.addBank = vrp.bank = async (id, value) => {
   if (await vrp.isOnline(id)) {
+    if (hasPlugin('@skycity'))
+      return lua(`vRP.darDinheiro(${id}, ${value})`);
+    
     return lua(`vRP.giveBankMoney(${id}, ${value})`)
   } else {
     return sql('UPDATE vrp_user_moneys SET bank=bank+? WHERE user_id=?', [value, id]);
