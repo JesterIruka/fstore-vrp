@@ -97,6 +97,12 @@ vrp.addTemporaryGroup = async (days, id, group) => {
  * @returns {Promise<{name: string, firstname: string}>}
  */
 vrp.getName = async (id) => {
+  if (hasPlugin('@asgardcity')) {
+    const [row] = await sql('SELECT * FROM vrp_users WHERE id=?', [id]);
+    if (row) {
+      return row.name + ' '+ row.name2;
+    } else return null;
+  }
   const [row] = await sql('SELECT * FROM vrp_user_identities WHERE user_id=?', [id]);
   if (row) {
     if (row.name && row.firstname) {
