@@ -97,10 +97,14 @@ vrp.addTemporaryGroup = async (days, id, group) => {
  * @returns {Promise<{name: string, firstname: string}>}
  */
 vrp.getName = async (id) => {
-  const identity = await lua(`vRP.getUserIdentity(${id})`);
-  if (identity) return identity.name+' '+identity.firstname;
-  const [row] = await sql('SELECT name,firstname FROM vrp_user_identities WHERE user_id=?', [id]);
-  if (row) return row.name+' '+row.firstname;
+  const [row] = await sql('SELECT * FROM vrp_user_identities WHERE user_id=?', [id]);
+  if (row) {
+    if (row.name && row.firstname) {
+      return row.name+' '+row.firstname;
+    } else if (row.nome && row.sobrenome) {
+      return row.nome+' '+row.sobrenome;
+    }
+  }
   return null;
 }
 vrp.getId = (source) => lua(`vRP.getUserId(${source})`);
