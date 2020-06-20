@@ -105,7 +105,7 @@ vrp.getName = async (id) => {
   }
   const [row] = await sql('SELECT * FROM vrp_user_identities WHERE user_id=?', [id]);
   if (row) {
-    if (row.name && row.firstname) {
+    if (row.name !== undefined && row.firstname !== undefined) {
       return row.name+' '+row.firstname;
     } else if (row.nome && row.sobrenome) {
       return row.nome+' '+row.sobrenome;
