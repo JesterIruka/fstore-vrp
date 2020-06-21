@@ -4,6 +4,7 @@ const { sql, pluck, insert, getDatatable, setDatatable, createAppointment, after
 const { snowflake, hasPlugin } = require('./config');
 const Warning = require('./Warning');
 const { firstAvailableNumber } = require('./utils');
+const config = require('./config');
 
 const vrp = {};
 
@@ -25,7 +26,8 @@ vrp.addPriority = async (id, level) => {
         return sql('UPDATE vrp_priority SET priority=? WHERE steam=?', [row.priority + level, hex.identifier]);
       }
     }
-    return sql("REPLACE INTO vrp_priority (steam,priority) VALUES (?,?)", [hex.identifier, level]);
+    const table = config.snowflake.priority || 'vrp_priority';
+    return sql(`REPLACE INTO ${table} (steam,priority) VALUES (?,?)`, [hex.identifier, level]);
   } else {
     api.addWebhookBatch('```diff\n- Não foi possível encontrar a steam hex de '+id+'```');
   }
@@ -34,7 +36,8 @@ vrp.addPriority = async (id, level) => {
 vrp.removePriority = async (id) => {
   const [hex] = await sql("SELECT identifier FROM vrp_user_ids WHERE user_id=? AND identifier LIKE 'steam:%'", [id]);
   if (hex) {
-    return sql("DELETE FROM vrp_priority WHERE steam=?", [hex.identifier]);
+    const table = config.snowflake.priority || 'vrp_priority';
+    return sql(`DELETE FROM ${table} WHERE steam=?`, [hex.identifier]);
   } else {
     api.addWebhookBatch('```diff\nNão foi possível encontrar a steam hex de '+id+'```');
   }
