@@ -117,8 +117,14 @@ vrp.getName = async (id) => {
   return null;
 }
 vrp.getId = (source) => lua(`vRP.getUserId(${source})`);
-vrp.getSource = (id) => lua(`vRP.getUserSource(${id})`);
-vrp.isOnline = (id) => lua(`vRP.getUserSource(${id}) ~= nil`);
+vrp.getSource = (id) => {
+  if (hasPlugin('@azteca')) return lua(`vRP.getUserSource({${id}})`);
+  return lua(`vRP.getUserSource(${id})`);
+}
+vrp.isOnline = (id) => {
+  if (hasPlugin('@azteca')) return lua(`vRP.getUserSource({${id}}) ~= nil`);
+  return lua(`vRP.getUserSource(${id}) ~= nil`);
+}
 vrp.hasPermission = (id, permission) => lua(`vRP.hasPermission(${id}, "${permission}")`);
 
 //
