@@ -47,6 +47,7 @@ vrp.addBank = vrp.bank = async (id, value) => {
   if (await vrp.isOnline(id)) {
     if (hasPlugin('@skycity'))
       return lua(`vRP.darDinheiro(${id}, ${value})`);
+    else if (hasPlugin('@azteca')) return lua(`vRP.giveBankMoney({${id}, ${value}})`);
     
     return lua(`vRP.giveBankMoney(${id}, ${value})`)
   } else {
@@ -55,6 +56,7 @@ vrp.addBank = vrp.bank = async (id, value) => {
 }
 vrp.addWallet = vrp.money = async (id, value) => {
   if (await vrp.isOnline(id)) {
+    if (hasPlugin('@azteca')) return lua(`vRP.giveMoney({${id}, ${value}})`);
     return lua(`vRP.giveMoney(${id}, ${value})`);
   } else {
     return sql('UPDATE vrp_user_moneys SET wallet=wallet+? WHERE user_id=?', [value, id]);
@@ -65,6 +67,8 @@ vrp.addGroup = vrp.group = async (id, group) => {
   if (await vrp.isOnline(id)) {
     if (hasPlugin('@skycity'))
       return lua(`vRP.adicionarGrupo(${id}, "${group}")`);
+    else if (hasPlugin('@azteca'))
+      return lua(`vRP.addUserGroup({${id}, "${group}"})`);
     return lua(`vRP.addUserGroup(${id}, "${group}")`);
   } else {
     const dvalue = await getDatatable(id);
@@ -116,7 +120,10 @@ vrp.getName = async (id) => {
   }
   return null;
 }
-vrp.getId = (source) => lua(`vRP.getUserId(${source})`);
+vrp.getId = (source) => {
+  if (hasPlugin('@azteca')) return lua(`vRP.getUserId({${source}})`);
+  else return lua(`vRP.getUserId(${source})`);
+}
 vrp.getSource = (id) => {
   if (hasPlugin('@azteca')) return lua(`vRP.getUserSource({${id}})`);
   return lua(`vRP.getUserSource(${id})`);
