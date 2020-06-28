@@ -51,11 +51,14 @@ async function fetch() {
     api.addWebhookBatch(`Processando venda número ${sale.id}`);
     
     const source = await vrp.getSource(sale.player);
-    const fullname = await vrp.getName(sale.player);
-    if (fullname === null) {
+    let fullname = await vrp.getName(sale.player);
+    if (fullname === undefined) {
       api.addWebhookBatch(`\`\`\`diff\n- ERRO: O jogador ${sale.player} não existe\`\`\``);
       await api.sendWebhookBatch();
       continue;
+    } else if (fullname === null) {
+      api.addWebhookBatch(`\`\`\`diff\n- AVISO: O jogador ${sale.player} não possui nome\`\`\``);
+      fullname = 'Sem nome';
     }
     const product = Object.values(sale.products).join(' & ');
     setImmediate(() => sendTitle(source, fullname, product));
@@ -75,10 +78,11 @@ async function fetch() {
         continue;
       }
     }
+    sale.success = true;
     await api.sendWebhookBatch();
   }
   if (sales.length > 0) 
-    await api.delivery(sales.map(s=>s.id));
+    await api.delivery(sales.filter(s=>s.success).map(s=>s.id));
 
   const refunds = await api.refunds();
   refunds.forEach(s => s.commands = s.commands.map(c => c.replace(/\?/g, s.player)));
@@ -121,7 +125,7 @@ async function fetch() {
 }
 
 const coroutine = () => fetch().catch(err => {
-  console.error('Falha na corotina: '+err.name);
+  console.error('Falha na corrotina: '+err.name);
   utils.printError(err);
 });
 

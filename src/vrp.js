@@ -108,7 +108,7 @@ vrp.getName = async (id) => {
     const [row] = await sql('SELECT * FROM vrp_users WHERE id=?', [id]);
     if (row) {
       return row.name + ' '+ row.name2;
-    } else return null;
+    } else return undefined;
   }
   const [row] = await sql('SELECT * FROM vrp_user_identities WHERE user_id=?', [id]);
   if (row) {
@@ -116,9 +116,9 @@ vrp.getName = async (id) => {
       return row.name+' '+row.firstname;
     } else if (row.nome && row.sobrenome) {
       return row.nome+' '+row.sobrenome;
-    }
+    } else return null;
   }
-  return null;
+  return undefined;
 }
 vrp.getId = (source) => {
   if (hasPlugin('@azteca', 'vrp-old')) return lua(`vRP.getUserId({${source}})`);
