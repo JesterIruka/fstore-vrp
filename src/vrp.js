@@ -148,6 +148,7 @@ vrp.addCar = vrp.addVehicle = async (id, spawn) => {
   else {
     const data = { user_id:id, vehicle:spawn };
     if (hasPlugin('@crypto') || hasPlugin('ipva')) data['ipva'] = now();
+    if (hasPlugin('@americandream')) data['can_sell'] = 0;
     await insert(snowflake.vehicles, data);
   }
 }
