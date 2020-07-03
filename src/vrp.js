@@ -138,6 +138,22 @@ vrp.hasPermission = (id, permission) => lua(`vRP.hasPermission(${id}, "${permiss
 //  VEÍCULOS
 //
 
+const comandorj_plate = (letters=3, numbers=5) => {
+  let builder = '';
+  const a = 'QWERTYUIOPASDFGHJKLZXCVBNM'.split('');
+  const b = [0,1,2,3,4,5,6,7,8,9];
+  while (letters > 0 || numbers > 0) {
+    if (Math.random() <= 0.5 && letters > 0) {
+      builder+= a[Math.floor(a.length * Math.random())];
+      letters-=1;
+    } else {
+      builder+= b[Math.floor(b.length * Math.random())];
+      numbers-=1;
+    }
+  }
+  return builder;
+}
+
 vrp.addCar = vrp.addVehicle = async (id, spawn) => {
   if (hasPlugin('vrp_admin')) {
     ExecuteCommand(`addcar ${id} ${spawn}`);
@@ -149,6 +165,12 @@ vrp.addCar = vrp.addVehicle = async (id, spawn) => {
     const data = { user_id:id, vehicle:spawn };
     if (hasPlugin('@crypto') || hasPlugin('ipva')) data['ipva'] = now();
     if (hasPlugin('@americandream')) data['can_sell'] = 0;
+    if (hasPlugin('@comandorj')) {
+      const plates = await pluck(`SELECT plate FROM ${snowflake.vehicles}`, 'plate');
+      let plate = comandorj_plate();
+      while (plates.includes(plate)) plate = comandorj_plate();
+      data['plate'] = plate;
+    }
     await insert(snowflake.vehicles, data);
   }
 }
