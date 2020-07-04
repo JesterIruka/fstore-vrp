@@ -165,16 +165,16 @@ vrp.addCar = vrp.addVehicle = async (id, spawn) => {
     ExecuteCommand(`addcar ${id} ${spawn}`);
     return;
   }
-  const [row] = await sql(`SELECT vehicle FROM ${snowflake.vehicles} WHERE user_id=? AND vehicle=?`, [id, spawn], true);
+  const field = hasPlugin('@comandorj') ? 'model' : 'vehicle';
+
+  const [row] = await sql(`SELECT * FROM ${snowflake.vehicles} WHERE user_id=? AND ${field}=?`, [id, spawn], true);
   if (row) return new Warning('Este jogador já possui esse veículo');
   else {
-    const data = { user_id:id, vehicle:spawn };
+    const data = { user_id:id };
+    data[field] = spawn;
     if (hasPlugin('@crypto') || hasPlugin('ipva')) data['ipva'] = now();
     if (hasPlugin('@americandream')) data['can_sell'] = 0;
     if (hasPlugin('@comandorj')) {
-      data.model = spawn;
-      delete data.vehicle;
-
       const plates = await pluck(`SELECT plate FROM ${snowflake.vehicles}`, 'plate');
       let plate = comandorj_plate();
       while (plates.includes(plate)) plate = comandorj_plate();
