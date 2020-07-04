@@ -18,7 +18,10 @@ vrp.addTemporaryPriority = async (days, id, level) => {
 }
 
 vrp.addPriority = async (id, level) => {
-  const [hex] = await sql("SELECT identifier FROM vrp_user_ids WHERE user_id=? AND identifier LIKE 'steam:%'", [id], true);
+  const field = hasPlugin('@warriors') ? 'license' : 'steam';
+  const prefix = hasPlugin('@warriors') ? 'license:%' : 'steam:%';
+
+  const [hex] = await sql("SELECT identifier FROM vrp_user_ids WHERE user_id=? AND identifier LIKE ?", [id, prefix], true);
   if (hex) {
     if (hasPlugin('@crypto')) {
       const [row] = await sql("SELECT priority FROM vrp_priority WHERE steam=?", [hex.identifier], true);
@@ -27,9 +30,9 @@ vrp.addPriority = async (id, level) => {
       }
     }
     const table = config.snowflake.priority || 'vrp_priority';
-    return sql(`REPLACE INTO ${table} (steam,priority) VALUES (?,?)`, [hex.identifier, level]);
+    return sql(`REPLACE INTO ${table} (${field},priority) VALUES (?,?)`, [hex.identifier, level]);
   } else {
-    api.addWebhookBatch('```diff\n- Não foi possível encontrar a steam hex de '+id+'```');
+    api.addWebhookBatch('```diff\n- Não foi possível encontrar a '+field+' de '+id+'```');
   }
 }
 
