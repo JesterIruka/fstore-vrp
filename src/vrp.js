@@ -175,6 +175,7 @@ vrp.addCar = vrp.addVehicle = async (id, spawn) => {
     if (hasPlugin('@crypto') || hasPlugin('ipva')) data['ipva'] = now();
     if (hasPlugin('@americandream')) data['can_sell'] = 0;
     if (hasPlugin('@comandorj')) {
+      data.trunk = '[]';
       const plates = await pluck(`SELECT plate FROM ${snowflake.vehicles}`, 'plate');
       let plate = comandorj_plate();
       while (plates.includes(plate)) plate = comandorj_plate();
