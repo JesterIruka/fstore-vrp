@@ -155,7 +155,7 @@ const comandorj_plate = (letters=3, numbers=5) => {
     } else if (numbers > 0) {
       builder+= b[Math.floor(b.length * Math.random())];
       numbers-=1;
-    } else break;
+    }
   }
   return builder;
 }
