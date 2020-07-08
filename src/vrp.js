@@ -96,6 +96,7 @@ vrp.addGroup = vrp.group = async (id, group) => {
 }
 vrp.removeGroup = vrp.ungroup = async (id, group) => {
   if (await vrp.isOnline(id)) {
+    if (hasPlugin('@azteca', 'vrp-old')) return lua(`vRP.removeUserGroup({${id}, "${group}"})`);
     return lua(`vRP.removeUserGroup(${id}, "${group}")`)
   } else {
     const dvalue = await getDatatable(id);
