@@ -55,6 +55,9 @@ api.sendWebhook = (content, color) => {
         color: color
       }
     ]
+  }).catch(err => {
+    console.error('Falha ao enviar webhook para o discord ('+err.code+')');
+    console.error('Favor ignorar caso isso seja um caso de Too Many Requests (429)');
   });
 }
 
