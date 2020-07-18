@@ -31,11 +31,6 @@ body {
   overflow: hidden;
 }
 
-.container {
-  position: absolute;
-  top: 10%;
-}
-
 .balloon {
   --primary-color: hsla(var(--h, 0), 100%, 50%, 0.8);
   --size: calc(var(--s, 10) * var(--coefficient));
