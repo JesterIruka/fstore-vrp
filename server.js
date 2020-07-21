@@ -7,7 +7,7 @@ const Warning = require('./src/Warning');
 const config = require('./config.json');
 const { update:updateResource } = require('./src/updater');
 
-function sleep() {
+function sleep(ms) {
   return new Promise((resolve) => {
     setTimeout(resolve, ms);
   })
