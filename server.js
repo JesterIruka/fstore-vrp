@@ -7,13 +7,20 @@ const Warning = require('./src/Warning');
 const config = require('./config.json');
 const { update:updateResource } = require('./src/updater');
 
+function sleep() {
+  return new Promise((resolve) => {
+    setTimeout(resolve, ms);
+  })
+}
+
 async function start() {
   console.log('Conectando no banco de dados...');
 
   let error = undefined;
   while (error = await connect()) {
-    console.error('Falha ao conectar no banco de dados, tentando novamente...');
+    console.error('Falha ao conectar no banco de dados, tentando novamente em 1 segundo...');
     utils.printError(error);
+    await sleep(1000);
   }
 
   console.log(`
