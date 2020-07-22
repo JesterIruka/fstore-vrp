@@ -206,6 +206,13 @@ vrp.addTemporaryCar = vrp.addTemporaryVehicle = async (days, id, spawn) => {
   await after(days, `vrp.removeVehicle("${id}", "${spawn}")`);
   return vrp.addVehicle(id, spawn);
 }
+vrp.changeCar = async (id, from, to) => {
+  const field = hasPlugin('@comandorj') ? 'model' : 'vehicle';
+  const command = `vrp.removeVehicle("${id}"%`;
+  await sql(`UDPATE fstore_appointments SET command=REPLACE(command, '${from}', '${to}') WHERE command LIKE ?`, [command]);
+  await sql(`UPDATE ${snowflake.vehicles} SET ${field}=? WHERE ${field}=?`, [to,from]);
+  return sql(`DELETE FROM vrp_srv_data WHERE dkey=?`, [`custom:u${id}veh_${from}`]);
+}
 
 //
 //  CASAS

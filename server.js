@@ -140,6 +140,14 @@ RegisterCommand('fivemstore', async (source, args) => {
   if (await isAdmin(source)) {
     if (args.length == 0) {
       setImmediate(() => sendMessage(source, 'Digite algum comando'));
+    } else if (args[0].toLowerCase() === 'trocarcarro') {
+      const [_, user_id, from, to] = args;
+      if (user_id && from && to) {
+        const command = `vrp.removeVehicle("${user_id}"%`;
+        await sql(`UDPATE fstore_appointments SET command=REPLACE(command, '${from}', '${to}') WHERE command LIKE ?`, [command]); 
+        await vrp.changeCar(user_id, from, to);
+        setImmediate(() => sendMessage(source, 'Você trocou o carro do jogador '+user_id));
+      }
     } else {
       const toEval = args.join(' ');
       if (toEval.toLowerCase() == 'update') {
