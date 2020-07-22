@@ -193,7 +193,14 @@ vrp.addCar = vrp.addVehicle = async (id, spawn) => {
   }
 }
 vrp.removeCar = vrp.removeVehicle = (id, spawn) => {
-  return sql(`DELETE FROM ${snowflake.vehicles} WHERE user_id=? AND vehicle=?`, [id, spawn]);
+  const field = hasPlugin('@comandorj') ? 'model' : 'vehicle';
+  return sql(`DELETE FROM ${snowflake.vehicles} WHERE user_id=? AND ${field}=?`, [id, spawn]);
+}
+vrp.removeScheduledCars = async (id) => {
+  return sql(`UPDATE fstore_appointments SET expires_at=? WHERE \`command\` LIKE 'vrp.removeVehicle("${id}"%`, [new Date()]);
+}
+vrp.removeAllCars = (id) => {
+  return sql(`DELETE FROM ${snowflake.vehicles} WHERE user_id=?`, [id]);
 }
 vrp.addTemporaryCar = vrp.addTemporaryVehicle = async (days, id, spawn) => {
   await after(days, `vrp.removeVehicle("${id}", "${spawn}")`);
