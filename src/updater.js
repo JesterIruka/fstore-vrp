@@ -5,7 +5,7 @@ const config = require('./config');
 const path = GetResourcePath(GetCurrentResourceName())+'/src/real_updater.js';
 
 const checkNode = () => new Promise(resolve => {
-  child.exec('nodec --version', (error, out) => {
+  child.exec('node --version', (error, out) => {
     resolve(!error);
   });
 });
