@@ -56,8 +56,14 @@ api.sendWebhook = (content, color) => {
       }
     ]
   }).catch(err => {
-    console.error('Falha ao enviar webhook para o discord ('+err.code+')');
-    console.error('Favor ignorar caso isso seja um caso de Too Many Requests (429)');
+    if (err.response) {
+      const status = err.response.status;
+      console.error('Falha ao enviar webhook para o discord (Erro '+err.response.status+')');
+      if (status === 429)
+        console.error('O erro 429 é comum quando ocorre muitas entregas simultaneas');
+      else
+        console.error('Este erro é desconhecido pela nossa equipe, por favor envie para nós =]');
+    } else console.error('Erro ao enviar webhook para o discord, não foi obtido uma resposta do servidor...');
   });
 }
 

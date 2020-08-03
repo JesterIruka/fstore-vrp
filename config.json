@@ -9,7 +9,12 @@
   },
   "snowflake": {
     "vehicles": "vrp_user_vehicles",
-    "priority": "vrp_priority"
+    "priority": "vrp_priority",
+    "esx": {
+      "admin_group": "admin",
+      "default_group": "unemployed",
+      "vehicle_plate": "AAA 000"
+    }
   },
   "requireOnlineToDelivery": false,
   "plugins": [],
@@ -23,5 +28,5 @@
     "title": "Parabéns, ${jogador}",
     "subtitle": "Você acabou de adquirir ${produto}"
   },
-  "webhook": "link-webhook-discord"
+  "webhook": "link-do-webhook"
 }

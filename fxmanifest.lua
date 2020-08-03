@@ -5,8 +5,6 @@ author 'JesterIruka'
 description 'Script da five-m.store'
 version '1.0.0'
 
-dependency "vrp"
-
 ui_page "nui/index.html"
 
 files {
@@ -15,7 +13,7 @@ files {
 }
 
 client_scripts {
-	"client.js"
+	"client.lua"
 }
 
 server_scripts {

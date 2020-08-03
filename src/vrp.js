@@ -240,7 +240,7 @@ vrp.addTemporaryHouse = vrp.addTemporaryHome = async (days, id, house) => {
 }
 
 vrp.addHomePermission = vrp.addHousePermission = async (id, prefix) => {
-  if (hasPlugin('@valhalla')) {
+  if (hasPlugin('@valhalla') || prefix.length > 2) {
     const [row] = await sql(`SELECT home FROM vrp_homes_permissions WHERE home=?`, [prefix], true);
     const data = { user_id:id, home:prefix, owner: 1, garage: 1 };
     if (!row) data['tax'] = now();

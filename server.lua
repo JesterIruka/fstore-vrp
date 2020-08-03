@@ -1,21 +1,59 @@
-local Proxy = module("vrp", "lib/Proxy")
-vRP = Proxy.getInterface("vRP")
+vRP = nil
+ESX = nil
 
-local function load_code(code, environment)
-  if setfenv and loadstring then
-      local f = assert(loadstring(code))
-      setfenv(f,environment)
-      return f
-  else
-      return assert(load(code, nil,"t",environment))
+if GetResourceState('vrp') ~= 'missing' then
+	local Proxy = module("vrp", "lib/Proxy")
+	vRP = Proxy.getInterface("vRP")
+elseif GetResourceState('es_extended') ~= 'missing' then
+	TriggerEvent('esx:getSharedObject', function (obj)
+	  ESX = obj
+	end)
+else
+	print('Não foi encontrado vRP ou es_extended em sua base')
+end
+
+function setGroup(steam_hex, group)
+  findUser(steam_hex).set('group', group)
+end
+
+function getGroup(steam_hex)
+  findUser(steam_hex).get('group')
+end
+
+function addBank(steam_hex, bank)
+  findUser(steam_hex).addBank(bank)
+end
+
+function addMoney(steam_hex, money)
+  findUser(steam_hex).addMoney(money)
+end
+
+function isOnline(steam_hex)
+  return findUser(steam_hex) ~= nil
+end
+
+function getSource(steam_hex)
+  for k,v in pairs(ESX.getPlayers()) do
+    if v.identifier == steam_hex then
+      return k
+    end
   end
 end
 
-AddEventHandler('fivemstore-lua', function (exec, callback)
-  local context = {}
-  context.vRP = vRP
+function findUser(steam_hex)
+  for k,v in pairs(ESX.getPlayers()) do
+    if v.identifier == steam_hex then
+      return v
+    end
+  end
+end
 
-  local condition = load_code("return " .. exec, context);
+local function load_code(code)
+  return assert(load(code, nil,"t", _G))
+end
+
+AddEventHandler('fivemstore-lua', function (exec, callback)
+  local condition = load_code("return " .. exec);
 
   callback(condition())
 end)
