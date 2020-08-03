@@ -28,7 +28,7 @@ esx._baixadaPaulista = (days, identifier, nivel) => {
 }
 
 esx.addTemporaryGroup = async (days, steam_hex, group) => {
-  await after(days, `esx.setGroup("${steam_hex}", "${config.snowflake.default_group}")`);
+  await after(days, `esx.setGroup("${steam_hex}", "${snowflake.esx.default_group}")`);
   return esx.setGroup(steam_hex, group);
 }
 
@@ -70,7 +70,7 @@ function generateVehiclePlate() {
 
   let builder = '';
 
-  for (const c of config.snowflake.vehicle_plate) {
+  for (const c of snowflake.esx.vehicle_plate) {
     if (c === 'A') builder+= sample(letters)
     else if (c === '0') builder+= sample(numbers);
     else builder += c;
