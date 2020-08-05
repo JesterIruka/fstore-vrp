@@ -7,7 +7,8 @@ const utils = require('./src/utils');
 const Warning = require('./src/Warning');
 const config = require('./config.json');
 const { update: updateResource } = require('./src/updater');
-const { snowflake } = require('./src/config');
+
+const snowflake = config.snowflake;
 
 function sleep(ms) {
   return new Promise((resolve) => {
