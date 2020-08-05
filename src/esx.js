@@ -3,7 +3,6 @@ const api = require('./api');
 const { sql, pluck, insert, createAppointment, after } = require('./mysql');
 const { hasPlugin, ...config } = require('./config');
 const Warning = require('./Warning');
-const config = require('./config');
 
 const snowflake = config.snowflake.esx;
 
