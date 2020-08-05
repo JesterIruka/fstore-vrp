@@ -1,17 +1,17 @@
 const { lua } = require('./lua');
 const api = require('./api');
 const { sql, pluck, insert, createAppointment, after } = require('./mysql');
-const { snowflake, hasPlugin } = require('./config');
+const { hasPlugin, ...config } = require('./config');
 const Warning = require('./Warning');
 const config = require('./config');
+
+const snowflake = config.snowflake.esx;
 
 const esx = {};
 
 esx.isOnline = (steam_hex) => lua(`isOnline("${steam_hex}")`);
 esx.getSource = (steam_hex) => lua(`getSource("${steam_hex}")`);
-esx.getSteamHex = (source) => lua(`ESX.Players[${source}].identifier`);
-esx.getGroup = (steam_hex) => lua(`getGroup("${steam_hex}")`);
-esx.getGroupById = (id) => lua(`getGroupById(${id})`);
+esx.getSteamHex = (source) => lua(`ESX.Players[${source}].identifier`)
 esx.getName = async (steam_hex) => {
   const [row] = await sql('SELECT firstname,lastname FROM users WHERE identifier=?', [steam_hex]);
   if (row) {
@@ -21,21 +21,30 @@ esx.getName = async (steam_hex) => {
   else return undefined;
 }
 
-esx._baixadaPaulista = (days, identifier, nivel) => {
+esx._baixadaPaulista = async (days, identifier, nivel) => {
   const time = Date.now() + (86400000 * days);
   const data = new Date(time).toISOString().split('T')[0].split('-').reverse().join('/');
+  
+  emitNet('esx_vip:checkset', await esx.getSource(identifier), nivel)
+  
+  const [old] = await sql('SELECT * FROM vip WHERE identifier=? AND nivel=?', [identifier, nivel]);
+  if (old) {
+	  return sql('UPDATE vip SET `data`=? WHERE identifier=? AND nivel=?', [data, identifier, nivel]);
+  }
+  
   return insert('vip', { identifier, data, nivel });
 }
 
 esx.addTemporaryGroup = async (days, steam_hex, group) => {
-  await after(days, `esx.setGroup("${steam_hex}", "${snowflake.esx.default_group}")`);
+  await after(days, `esx.setGroup("${steam_hex}", "${snowflake.default_group}")`);
   return esx.setGroup(steam_hex, group);
 }
 
 esx.setGroup = async (steam_hex, group) => {
   if (await esx.isOnline(steam_hex))
-    await lua(`setGroup("${steam_hex}", "${group}")`)
-  return sql('UPDATE users SET `group`=? WHERE identifier=?', [group, steam_hex]);
+    return lua(`setGroup("${steam_hex}", "${group}")`)
+  else
+    return sql('UPDATE users SET group=? WHERE identifier=?', [group, steam_hex]);
 }
 
 esx.addBank = async (steam_hex, value) => {
@@ -70,7 +79,7 @@ function generateVehiclePlate() {
 
   let builder = '';
 
-  for (const c of snowflake.esx.vehicle_plate) {
+  for (const c of snowflake.vehicle_plate) {
     if (c === 'A') builder+= sample(letters)
     else if (c === '0') builder+= sample(numbers);
     else builder += c;
@@ -154,7 +163,7 @@ function createVehicle(model, plate) {
 
 esx.addTemporaryCar = esx.addTemporaryVehicle = async (days, steam_hex, model, type='car') => {
   await after(days, `esx.removeVehicle("${steam_hex}", "${model}")`);
-  return esx.addCar(steam_hex, mode, type);
+  return esx.addCar(steam_hex, model, type);
 }
 
 esx.addCar = esx.addVehicle = async (steam_hex, model, type = 'car') => {
@@ -172,7 +181,7 @@ esx.addCar = esx.addVehicle = async (steam_hex, model, type = 'car') => {
     security: 0,
     state: 0,
     plate,
-    vehicle: createVehicle(hash, plate),
+    vehicle: JSON.stringify(createVehicle(hash, plate)),
     type,
     job: '',
     stored: 0,
