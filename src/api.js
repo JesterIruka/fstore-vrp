@@ -5,33 +5,52 @@ const { token, webhook:webhook_url } = require('./config');
 
 const hasWebhook = webhook_url.toLowerCase().includes("discordapp.com/api/webhooks");
 
-
 const endpoint = axios.create({
-  baseURL: `https://five-m.store/api/${token}`
+  baseURL: `https://five-m.store/api/v2`,
+  headers: {
+    Authorization: token
+  }
 });
 
 const api = {};
 const batch = [];
 
 /**
- * @returns {Promise<Array<{id:number;player:number;commands:string[];products: object>>}
+ * @returns {Promise<FetchResponse>}
  */
-api.packages = async () => {
-  const { data } = await endpoint.get('/packages');
+api.fetch = async () => {
+  const { data } = await endpoint.get('/fetch');
   return data;
 }
 
 /**
- * @returns {Promise<Array<{id:number;player:number;commands:string[];}>>}
+ * @param {number} players 
+ * @param {Array} sales
+ * @returns {Promise<CallbackResponse>}
  */
-api.refunds = async () => {
-  const { data } = await endpoint.get('/refunds');
+api.callback = async (players, sales) => {
+  const { data } = await endpoint.post('/callback', { players, sales });
   return data;
 }
 
-api.punish = (ids)  => endpoint.get(`/punish?ids=${ids.join(',')}`);
-api.delivery = (ids) => endpoint.get(`/delivery?ids=${ids.join(',')}`);
-api.players = (online) => endpoint.patch(`/players`, { online });
+api.setMetadata = (key, value) => {
+  return endpoint.put('/setmetadata', { key, value }).catch(_ => {
+    console.error('Falha ao sincronizar as casas do servidor com a loja');
+    console.error('Este erro pode ser grave, é recomendado que se reinicie o script.');
+  });
+}
+
+api.addMetadata = (key, value) => {
+  return endpoint.patch('/addmetadata', { key, value }).catch(_ => {
+    console.error(`Falha ao proibir a casa ${value} da loja (Metadata error)`);
+  });
+}
+
+api.removeMetadata = (key, value) => {
+  return endpoint.patch('/removemetadata', { key, value }).catch(_ => {
+    console.error(`Falha ao liberar a casa ${value} da loja (Metadata error)`);
+  });
+}
 
 api.addWebhookBatch = (content) => {
   if (hasWebhook && batch.join('\n').length >= 1750) {

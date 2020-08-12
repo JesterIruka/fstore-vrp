@@ -1,3 +1,4 @@
+const { update: updateResource } = require('./src/updater');
 const { lua } = require('./src/lua');
 const { connect, ping, sql, after, ...database } = require('./src/mysql');
 const proxy = require('./src/proxy');
@@ -6,7 +7,6 @@ const api = require('./src/api');
 const utils = require('./src/utils');
 const Warning = require('./src/Warning');
 const config = require('./config.json');
-const { update: updateResource } = require('./src/updater');
 
 const snowflake = config.snowflake;
 
@@ -56,68 +56,40 @@ async function start() {
 }
 
 async function fetch() {
-  let sales = await api.packages();
-  if (!proxy.isVRP)
-    sales.forEach(s => s.player = 'steam:' + s.player);
-  sales.forEach(s => s.commands = s.commands.map(c => c.replace(/\?/g, s.player)));
+  const response = await api.fetch();
 
-  if (config.requireOnlineToDelivery) {
-    for (let s of sales)
-      if (!(await proxy.isOnline(s.player)))
-        sales = sales.filter(sale => sale.id != s.id);
-  }
+  const changed = [];
 
-  for (const sale of sales) {
-    api.addWebhookBatch(`Processando venda número ${sale.id}`);
+  const all = [...response.approved, ...response.refunded];
+  if (proxy.isESX) all.forEach(s => s.player = 'steam:'+s.player);
+  all.forEach(s => s.commands = s.commands.map(c => c.replace(/\?/g, s.player)));
 
-    const source = await proxy.getSource(sale.player);
-    let fullname = await proxy.getName(sale.player);
-    if (fullname === undefined) {
-      api.addWebhookBatch(`\`\`\`diff\n- ERRO: O jogador ${sale.player} não existe\`\`\``);
-      await api.sendWebhookBatch();
-      continue;
-    } else if (fullname === null) {
-      api.addWebhookBatch(`\`\`\`diff\n- AVISO: O jogador ${sale.player} não possui nome\`\`\``);
-      fullname = 'Sem nome';
+  for (let sale of all) {
+    if (sale.delivery) {
+      if (config.requireOnlineToDelivery && !proxy.isOnline(sale.player)) continue;
+
+      const source = await proxy.getSource(sale.player);
+      let fullname = await proxy.getName(sale.player);
+      if (fullname === undefined) {
+        api.addWebhookBatch(`\`\`\`diff\n- ERRO: O jogador ${sale.player} não existe\`\`\``);
+        await api.sendWebhookBatch();
+        continue;
+      } else if (fullname === null) {
+        api.addWebhookBatch(`\`\`\`diff\n- AVISO: O jogador ${sale.player} não possui nome\`\`\``);
+        fullname = 'Sem nome';
+      }
+
+      api.addWebhookBatch(`Processando entrega #${sale.id}`);
+
+      const product = Object.values(sale.products).join(' & ');
+      sendTitle(source, fullname, product);
+    } else {
+      api.addWebhookBatch(`Processando reembolso #${sale.id}`);
     }
-    const product = Object.values(sale.products).join(' & ');
-    setImmediate(() => sendTitle(source, fullname, product));
-
     for (const command of sale.commands) {
-      api.addWebhookBatch(`\`\`\`js\n${command}\`\`\``);
       try {
         const response = await eval(command);
-        if (response instanceof Warning) {
-          api.addWebhookBatch(`\`\`\`diff\n- AVISO: ${response.message}\`\`\``);
-        }
-      } catch (error) {
-        console.error('Falha ao executar o comando: ' + command);
-        utils.printError(error);
-        api.addWebhookBatch('Falha ao executar');
-        api.addWebhookBatch('```diff\n' + `- ${error.message}` + '```')
-        continue;
-      }
-    }
-    sale.success = true;
-    await api.sendWebhookBatch();
-  }
-  if (sales.length > 0)
-    await api.delivery(sales.filter(s => s.success).map(s => s.id));
-
-  const refunds = await api.refunds();
-  if (!proxy.isVRP)
-    sales.forEach(s => s.player = 'steam:' + s.player);
-  refunds.forEach(s => s.commands = s.commands.map(c => c.replace(/\?/g, s.player)));
-
-  for (let refund of refunds) {
-    api.addWebhookBatch(`Processando reembolso número ${refund.id}`);
-    for (let command of refund.commands) {
-      api.addWebhookBatch(`\`${command}\``);
-      try {
-        const response = await eval(command);
-        if (response instanceof Warning) {
-          api.addWebhookBatch(`\`\`\`diff\n- AVISO: ${response.message}\`\`\``);
-        }
+        if (response instanceof Warning) api.addWebhookBatch(`\`\`\`diff\n- AVISO: ${response.message}\`\`\``);
       } catch (error) {
         console.error('Falha ao executar o comando: ' + command);
         utils.printError(error);
@@ -127,11 +99,12 @@ async function fetch() {
       }
     }
     await api.sendWebhookBatch();
+    changed.push(sale.id);
   }
-  if (refunds.length > 0)
-    await api.punish(refunds.map(s => s.id));
 
-  await api.players(GetNumPlayerIndices());
+  if (changed.length > 0 || response.widgets['online_players']) {
+    await api.callback(GetNumPlayerIndices(), changed);
+  }
 
   const appointments = await database.getAppointments();
 

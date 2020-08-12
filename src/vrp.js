@@ -5,6 +5,7 @@ const { snowflake, hasPlugin } = require('./config');
 const Warning = require('./Warning');
 const { firstAvailableNumber } = require('./utils');
 const config = require('./config');
+const homesMonitor = require('./vrp_homes_permissions');
 
 const vrp = {};
 
@@ -115,7 +116,7 @@ vrp.addTemporaryGroup = async (days, id, group) => {
 }
 /**
  * 
- * @returns {Promise<{name: string, firstname: string}>}
+ * @returns {Promise<string>}
  */
 vrp.getName = async (id) => {
   if (hasPlugin('@asgardcity')) {
@@ -240,13 +241,26 @@ vrp.addTemporaryHouse = vrp.addTemporaryHome = async (days, id, house) => {
 }
 
 vrp.addHomePermission = vrp.addHousePermission = async (id, prefix) => {
-  if (hasPlugin('@valhalla') || prefix.length > 2) {
+  if (hasPlugin('@valhalla')) {
     const [row] = await sql(`SELECT home FROM vrp_homes_permissions WHERE home=?`, [prefix], true);
     const data = { user_id:id, home:prefix, owner: 1, garage: 1 };
     if (!row) data['tax'] = now();
     await insert('vrp_homes_permissions', data);
+    await homesMonitor.add(prefix);
+    return prefix;
+  } else if (prefix.length > 2) {
+    const [row] = await sql(`SELECT user_id,home FROM vrp_homes_permissions WHERE home=? AND owner=1`, [prefix], true);
+    if (row) {
+      if (row.user_id == id) return prefix;
+      return new Warning(`A casa ${prefix} já está ocupada por um jogador`);
+    }
+    const data = { user_id: id, home: prefix, owner: 1, garage: 1, tax: now() };
+    if (hasPlugin('home-no-tax')) delete data['tax'];
+    await insert('vrp_homes_permissions', data);
+    await homesMonitor.add(prefix);
     return prefix;
   }
+  /* CASAS ALEATÓRIAS COM PRIMEIRA DISPONIBILIDADE (LEGADO) */
   let occupied = await pluck(`SELECT home FROM vrp_homes_permissions WHERE home LIKE '${prefix}%'`, 'home');
   const higher = firstAvailableNumber(occupied.map(s => parseInt(s.substring(prefix.length))));
   const home = prefix+(higher.toString().padStart(2, '0'));
@@ -259,13 +273,15 @@ vrp.addHomePermission = vrp.addHousePermission = async (id, prefix) => {
 }
 vrp.removeHomePermission = vrp.removeHousePermission = async (id, prefix) => {
   if (prefix.length > 2) {
+    await homesMonitor.remove(prefix);
     await sql('UPDATE vrp_srv_data SET dvalue=? WHERE dkey LIKE ?', ['{}', `%:${prefix}`]);
-    return sql('DELETE FROM vrp_homes_permissions WHERE user_id=? AND home = ?', [id, prefix]);
+    return sql('DELETE FROM vrp_homes_permissions WHERE home = ?', [prefix]);
   }
   return sql('DELETE FROM vrp_homes_permissions WHERE user_id=? AND home LIKE ?', [id, prefix+'%']);
 }
 vrp.addTemporaryHousePermission = vrp.addTemporaryHomePermission = async (days, id, prefix) => {
   const entry = await vrp.addHousePermission(id, prefix);
+  if (entry instanceof Warning) return entry;
   return after(days, `vrp.removeHousePermission("${id}", "${entry}")`);
 }
 

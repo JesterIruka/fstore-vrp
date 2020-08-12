@@ -4,6 +4,8 @@ const { addWebhookBatch } = require('./api');
 const utils = require('./utils');
 
 let connection = undefined;
+let tables = [];
+let onConnect = [];
 
 module.exports.ping = (cb) => {
   if (connection) connection.ping(cb);
@@ -11,12 +13,24 @@ module.exports.ping = (cb) => {
 
 module.exports.connect = () => (new Promise((resolve) => {
   try {
+    onConnect.push(resolve);
     connection = mysql.createConnection(config.mysql);
-    connection.connect(err => resolve(err));
+    connection.connect(err => onConnect.forEach(r => r(err)));
   } catch (error) {
     resolve(error);
   }
 }));
+
+module.exports.onConnect = (callback) => {
+  if (connection && (connection.state === 'connected' || connection.state === 'authenticated')) callback();
+  else onConnect.push(callback);
+}
+
+module.exports.queryTables = async () => {
+  if (tables.length) return;
+  const rows = await sql('SHOW TABLES', [], true);
+  tables = rows.map(r => Object.values(r)[0]);
+}
 
 module.exports.isConnected = () => connection && connection.state == 'connected';
 
@@ -47,9 +61,13 @@ module.exports.pluck = async (SQL, column, args=[], ignore=true) => {
 }
 
 module.exports.insert = (table, data) => {
-  const marks = Object.values(data).map(s=>'?').join(',');
+  const marks = Object.values(data).map(_=>'?').join(',');
   const cmd = `INSERT INTO ${table} (${Object.keys(data).join(',')}) VALUES (${marks})`;
   return sql(cmd, Object.values(data));
+}
+
+module.exports.tables = () => {
+  return tables;
 }
 
 module.exports.createAppointmentsTable = () => (
