@@ -184,6 +184,9 @@ vrp.addCar = vrp.addVehicle = async (id, spawn) => {
     if (hasPlugin('@centralroleplay')) {
       const [old] = await sql(`SELECT vtype FROM fstore_helper WHERE spawn=?`, [spawn], true);
       data['veh_type'] = old ? old.vtype : 'car';
+
+      const [udata] = await sql(`SELECT registration FROM vrp_user_identities WHERE user_id=?`, [id], true);
+      data['vehicle_plate'] = 'P '+udata.registration;
     }
     if (hasPlugin('@crypto') || hasPlugin('ipva')) data['ipva'] = now();
     if (hasPlugin('@americandream')) data['can_sell'] = 0;
