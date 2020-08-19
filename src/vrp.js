@@ -19,6 +19,9 @@ vrp.addTemporaryPriority = async (days, id, level) => {
 }
 
 vrp.addPriority = async (id, level) => {
+  if (hasPlugin('@trustcity'))
+    return sql(`REPLACE INTO ${config.snowflake.priority || 'vrp_priority'} VALUES (?)`, [id]);
+
   const field = hasPlugin('@warriors') ? 'license' : 'steam';
   const prefix = hasPlugin('@warriors') ? 'license:%' : 'steam:%';
 
@@ -38,6 +41,9 @@ vrp.addPriority = async (id, level) => {
 }
 
 vrp.removePriority = async (id) => {
+  if (hasPlugin('@trustcity'))
+    return sql(`DELETE FROM vrp_priority WHERE id=?`, [id]);
+
   const field = hasPlugin('@warriors') ? 'license' : 'steam';
   const prefix = hasPlugin('@warriors') ? 'license:%' : 'steam:%';
 
