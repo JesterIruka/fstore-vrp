@@ -13,12 +13,18 @@ const excluded = [
   '/Instalar.bat'
 ];
 
+// Arquivos que só serão criados automaticamente
+const onlyCreate = [
+  '/src/custom.js'
+];
+
 async function update() {
   const response = await axios.get(repository, {responseType: 'arraybuffer'});
   const zip = await unzipper.Open.buffer(response.data);
   for (let file of zip.files) {
     if (file.path.endsWith('/')) continue;
     let path = file.path.replace('fstore-vrp-master', '');
+    if (onlyCreate.includes(path) && fs.existsSync(folder+path)) continue;
     if (path.length && !excluded.includes(path)) {
       const buffer = await file.buffer();
       fs.writeFileSync(folder+path, buffer);

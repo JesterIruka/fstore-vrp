@@ -3,6 +3,7 @@ const { lua } = require('./src/lua');
 const { connect, ping, sql, after, ...database } = require('./src/mysql');
 const proxy = require('./src/proxy');
 const { vrp, esx } = proxy;
+const custom = require('./src/custom');
 const api = require('./src/api');
 const utils = require('./src/utils');
 const Warning = require('./src/Warning');
