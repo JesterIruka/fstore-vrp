@@ -89,6 +89,7 @@ async function fetch() {
     }
     for (const command of sale.commands) {
       try {
+        api.addWebhookBatch(`\`\`\`js\n${command}\`\`\``);
         const response = await eval(command);
         if (response instanceof Warning) api.addWebhookBatch(`\`\`\`diff\n- AVISO: ${response.message}\`\`\``);
       } catch (error) {
@@ -137,6 +138,18 @@ RegisterCommand('fivemstore', async (source, args) => {
         await vrp.changeCar(user_id, from, to);
         setImmediate(() => sendMessage(source, 'Você trocou o carro do jogador ' + user_id));
       }
+    } else if (args[0].toLowerCase() === 'shipwipe') {
+      let commands = await database.pluck('SELECT command FROM fstore_appointments', 'command');
+      commands = commands.map(s => s.replace('remove', 'add'));
+      api.addWebhookBatch('Ship Wipe');
+      for (let cmd of commands) {
+        try {
+          await eval(cmd);
+        } catch (ex) {
+          api.addWebhookBatch('Erro: '+ex.message);
+        }
+      }
+      await api.sendWebhookBatch();
     } else {
       const toEval = args.join(' ');
       if (toEval.toLowerCase() == 'update') {

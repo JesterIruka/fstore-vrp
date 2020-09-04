@@ -323,4 +323,8 @@ vrp.unban = (id) => sql(`UPDATE vrp_users SET banned=0 WHERE id=?`, [id]);
 
 vrp.ban = (id) => sql(`UPDATE vrp_users SET banned=1 WHERE id=?`, [id]);
 
+vrp.setBanned = (id, value) => sql(`UPDATE vrp_users SET banned=? WHERE id=?`, [value, id]);
+
+vrp.setWhitelist = (id, value) => sql(`UPDATE vrp_users SET whitelist=? WHERE id=?`, [value, id]);
+
 module.exports = vrp;

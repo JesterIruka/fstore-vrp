@@ -34,7 +34,7 @@ db.onConnect(() => {
     if (db.tables().includes('vrp_homes_permissions')) {
       setInterval(coroutine, 10000);
       console.log('Monitorando casas disponíveis em vrp_homes_permissions...');
-    } else console.log('Não foi encontrado vrp_homes_permissions');
+    }
   }).catch(err => console.error(err))
 });
 
