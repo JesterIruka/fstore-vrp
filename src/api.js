@@ -16,6 +16,14 @@ const api = {};
 const batch = [];
 
 /**
+ * @returns {Promise<StatusResponse>}
+ */
+api.status = async () => {
+  const { data } = await endpoint.get('/status');
+  return data;
+}
+
+/**
  * @returns {Promise<FetchResponse>}
  */
 api.fetch = async () => {

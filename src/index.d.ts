@@ -6,6 +6,12 @@ interface Sale {
   delivery: boolean;
 }
 
+interface StatusResponse {
+  plan: String;
+  remaining: number;
+  hours: number;
+}
+
 interface FetchResponse {
   approved: Sale[];
   refunded: Sale[];

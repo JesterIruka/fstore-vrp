@@ -36,6 +36,14 @@ async function start() {
   | |     _| |_   \\  /  | |____         | |  | |_ ____) |  | | | |__| | | \\ \\| |____ 
   |_|    |_____|   \\/   |______|        |_|  |_(_)_____/   |_|  \\____/|_|  \\_\\______|
   `);
+
+  api.status().then(({plan, remaining, hours}) => {
+    if (plan !== 'Free' && remaining >= 0) {
+      const bg = remaining < 3 ? '\x1b[41m' : remaining <= 7 ? '\x1b[43m' : '\x1b[42m';
+      console.log(bg+'\x1b[30m', `Seu plano ${plan} expira em ${remaining||hours} ${remaining?'dia':'hora'}${remaining!=1?'s':''}`, '\x1b[0m');
+    }
+  }).catch(() => console.error('Não foi possível buscar informações sobre o seu plano atual'));
+
   if (proxy.isVRP) {
     console.log('Base detectada pelo script: VRP');
   } else if (proxy.isESX) {
