@@ -131,7 +131,10 @@ async function fetch() {
 
 const coroutine = () => fetch().catch(err => {
   console.error('Falha na corrotina: ' + err.name);
-  utils.printError(err);
+  if (err.response) {
+    console.error('RESPONSE: '+err.request.path);
+    console.error(JSON.stringify(err.response.data));
+  } else utils.printError(err);
 });
 
 RegisterCommand('fivemstore', async (source, args) => {
