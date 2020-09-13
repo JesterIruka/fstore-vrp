@@ -21,10 +21,6 @@ const update = async () => {
       } else {
         if (out) console.log(out);
         if (err) console.log(err);
-
-        child.exec(`cd "${folder}";npm i`, (error, _, _) => {
-          if (!error) console.log('Todas as dependências foram atualizadas!');
-        });
       }
     });
   } else {
