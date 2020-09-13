@@ -131,7 +131,8 @@ vrp.getName = async (id) => {
       return row.name + ' '+ row.name2;
     } else return undefined;
   }
-  const [row] = await sql('SELECT * FROM vrp_user_identities WHERE user_id=?', [id]);
+  const table = hasPlugin('name_in_vrp_users') ? 'vrp_users' : 'vrp_user_identities';
+  const [row] = await sql(`SELECT * FROM ${table} WHERE user_id=?`, [id]);
   if (row) {
     if (row.name !== undefined && row.firstname !== undefined) {
       return row.name+' '+row.firstname;
