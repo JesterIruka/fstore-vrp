@@ -2,7 +2,8 @@ const child = require('child_process');
 const utils = require('./utils');
 const config = require('./config');
 
-const path = GetResourcePath(GetCurrentResourceName())+'/src/real_updater.js';
+const folder = GetResourcePath(GetCurrentResourceName());
+const path = folder+'/src/real_updater.js';
 
 const checkNode = () => new Promise(resolve => {
   child.exec('node --version', (error, out) => {
@@ -20,6 +21,10 @@ const update = async () => {
       } else {
         if (out) console.log(out);
         if (err) console.log(err);
+
+        child.exec(`cd "${folder}";npm i`, (error, _, _) => {
+          if (!error) console.log('Todas as dependências foram atualizadas!');
+        });
       }
     });
   } else {
