@@ -8,6 +8,7 @@
     "password": ""
   },
   "snowflake": {
+    "database_prefix": "vrp",
     "vehicles": "vrp_user_vehicles",
     "priority": "vrp_priority",
     "esx": {
