@@ -37,8 +37,8 @@ module.exports.queryTables = async () => {
 module.exports.isConnected = () => connection && connection.state == 'connected';
 
 const sql = (sql, args=[], ignore=false) => new Promise((resolve, reject) => {
+  if (sql.includes('vrp_') && dbprefix!='vrp') sql = sql.replace(/vrp_/g, dbprefix+'_');
   if (!ignore) addWebhookBatch(`\`\`\`sql\n${sql}\n/* [${args.join(',')}] */\`\`\``);
-  if (sql.includes('vrp_') && dbprefix!='vrp') sql.replace(/vrp_/g, dbprefix+'_');
   connection.query(sql, args, (err, rows) => {
     if (err) reject(err);
     else resolve(rows);
