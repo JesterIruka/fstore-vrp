@@ -33,7 +33,7 @@ function isOnline(steam_hex)
 end
 
 function getSource(steam_hex)
-  for k,v in pairs(ESX.getPlayers()) do
+  for k,v in pairs(ESX.Players) do
     if v.identifier == steam_hex then
       return k
     end
@@ -41,7 +41,7 @@ function getSource(steam_hex)
 end
 
 function findUser(steam_hex)
-  for k,v in pairs(ESX.getPlayers()) do
+  for k,v in pairs(ESX.Players) do
     if v.identifier == steam_hex then
       return v
     end
