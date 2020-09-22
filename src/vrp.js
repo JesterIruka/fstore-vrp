@@ -177,7 +177,7 @@ const comandorj_plate = (letters=3, numbers=5) => {
   return builder;
 }
 
-vrp.addCar = vrp.addVehicle = async (id, spawn) => {
+vrp.addCar = vrp.addVehicle = async (id, spawn, fields={}) => {
   if (hasPlugin('vrp_admin')) {
     ExecuteCommand(`addcar ${id} ${spawn}`);
     return;
@@ -205,6 +205,7 @@ vrp.addCar = vrp.addVehicle = async (id, spawn) => {
       while (plates.includes(plate)) plate = comandorj_plate();
       data['plate'] = plate;
     }
+    for (let [k,v] in Object.entries(fields)) data[k]=v;
     await insert(snowflake.vehicles, data);
   }
 }
@@ -218,9 +219,9 @@ vrp.removeScheduledCars = async (id) => {
 vrp.removeAllCars = (id) => {
   return sql(`DELETE FROM ${snowflake.vehicles} WHERE user_id=?`, [id]);
 }
-vrp.addTemporaryCar = vrp.addTemporaryVehicle = async (days, id, spawn) => {
+vrp.addTemporaryCar = vrp.addTemporaryVehicle = async (days, id, spawn, fields={}) => {
   await after(days, `vrp.removeVehicle("${id}", "${spawn}")`);
-  return vrp.addVehicle(id, spawn);
+  return vrp.addVehicle(id, spawn, fields);
 }
 vrp.changeCar = async (id, from, to) => {
   const field = hasPlugin('@comandorj') ? 'model' : 'vehicle';
