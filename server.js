@@ -22,9 +22,26 @@ async function start() {
 
   let error = undefined;
   while (error = await connect()) {
-    console.error('Falha ao conectar no banco de dados, tentando novamente em 1 segundo...');
-    utils.printError(error);
-    await sleep(1000);
+    const msg = error.message || '';
+    if (msg.includes('TIMEDOUT')) {
+      console.error('Um timedout ocorreu ao se conectar com o banco de dados');
+      console.error('Este problema é comum, o script tentará novamente em 5 segundos');
+    } else if (msg.includes('ENOTFOUND')) {
+      console.error(`Não foi possível resolver o endereço "${config.mysql.host}"`);
+      console.error('Verifique esta informação e reinicie o script');
+      await sleep(55000);
+    } else if (msg.includes('ER_ACCESS_DENIED_ERROR')) {
+      console.error('Não foi possível se autenticar, verifique seu usuário e senha na config');
+      console.error('A conexão será recriada após 10 segundos, mas sem certeza de sucesso');
+      await sleep(5000);
+    } else if (msg.includes('ECONNREFUSED')) {
+      console.error('Não foi possível se conectar no banco de dados (Recusada)');
+      return console.error('Verifique seu firewall e/ou a porta na config, o script não iniciará');
+    } else {
+      console.error('Falha ao conectar no banco de dados, tentando novamente em 5 segundos...');
+      utils.printError(error);
+    }
+    await sleep(5000);
   }
 
   console.log(`
