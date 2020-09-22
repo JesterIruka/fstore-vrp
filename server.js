@@ -34,6 +34,9 @@ async function start() {
       console.error('Não foi possível se autenticar, verifique seu usuário e senha na config');
       console.error('A conexão será recriada após 10 segundos, mas sem certeza de sucesso');
       await sleep(5000);
+    } else if (msg.includes('BAD_DB_ERROR')) {
+      console.error(`A database "${config.mysql.database}" não existe`);
+      return console.error('Preencha corretamente a database na config.json e reinicie o script');
     } else if (msg.includes('ECONNREFUSED')) {
       console.error('Não foi possível se conectar no banco de dados (Recusada)');
       return console.error('Verifique seu firewall e/ou a porta na config, o script não iniciará');
