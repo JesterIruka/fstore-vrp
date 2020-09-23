@@ -43,20 +43,20 @@ api.callback = async (players, sales) => {
 
 api.setMetadata = (key, value) => {
   return endpoint.put('/setmetadata', { key, value }).catch(_ => {
-    console.error('Falha ao sincronizar as casas do servidor com a loja');
+    console.error('Falha ao modificar a metadata: '+key);
     console.error('Este erro pode ser grave, é recomendado que se reinicie o script.');
   });
 }
 
 api.addMetadata = (key, value) => {
   return endpoint.patch('/addmetadata', { key, value }).catch(_ => {
-    console.error(`Falha ao proibir a casa ${value} da loja (Metadata error)`);
+    console.error(`Falha ao adicionar ${JSON.stringify(value)} da loja (Metadata error)`);
   });
 }
 
 api.removeMetadata = (key, value) => {
   return endpoint.patch('/removemetadata', { key, value }).catch(_ => {
-    console.error(`Falha ao liberar a casa ${value} da loja (Metadata error)`);
+    console.error(`Falha ao remover ${JSON.stringify(value)} da loja (Metadata error)`);
   });
 }
 

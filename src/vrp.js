@@ -257,23 +257,16 @@ vrp.addTemporaryHouse = vrp.addTemporaryHome = async (days, id, house) => {
 }
 
 vrp.addHomePermission = vrp.addHousePermission = async (id, prefix) => {
-  if (hasPlugin('@valhalla')) {
-    const [row] = await sql(`SELECT home FROM vrp_homes_permissions WHERE home=?`, [prefix], true);
-    const data = { user_id:id, home:prefix, owner: 1, garage: 1 };
-    if (!row) data['tax'] = now();
-    await insert('vrp_homes_permissions', data);
-    await homesMonitor.add(prefix);
-    return prefix;
-  } else if (prefix.length > 2) {
+  if (prefix.length > 2) {
     const [row] = await sql(`SELECT user_id,home FROM vrp_homes_permissions WHERE home=? AND owner=1`, [prefix], true);
     if (row) {
-      if (row.user_id == id) return prefix;
-      return new Warning(`A casa ${prefix} já está ocupada por um jogador`);
+      if (row.user_id == id) return new Warning('O jogador já possui a casa (Renovando...)');
+      return new Warning(`A casa ${prefix} já está ocupada por um jogador diferente`);
     }
     const data = { user_id: id, home: prefix, owner: 1, garage: 1, tax: now() };
     if (hasPlugin('home-no-tax')) delete data['tax'];
     await insert('vrp_homes_permissions', data);
-    await homesMonitor.add(prefix);
+    await homesMonitor.add(prefix, id);
     return prefix;
   }
   /* CASAS ALEATÓRIAS COM PRIMEIRA DISPONIBILIDADE (LEGADO) */
@@ -296,9 +289,8 @@ vrp.removeHomePermission = vrp.removeHousePermission = async (id, prefix) => {
   return sql('DELETE FROM vrp_homes_permissions WHERE user_id=? AND home LIKE ?', [id, prefix+'%']);
 }
 vrp.addTemporaryHousePermission = vrp.addTemporaryHomePermission = async (days, id, prefix) => {
-  const entry = await vrp.addHousePermission(id, prefix);
-  if (entry instanceof Warning) return entry;
-  return after(days, `vrp.removeHousePermission("${id}", "${entry}")`);
+  await after(days, `vrp.removeHousePermission("${id}", "${prefix}")`);
+  return vrp.addHousePermission(id, prefix);
 }
 
 //

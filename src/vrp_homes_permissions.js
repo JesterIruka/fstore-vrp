@@ -1,41 +1,44 @@
 const db = require('./mysql');
 const api = require('./api');
+const config = require('./config');
 
-var last = [];
+var last = {};
 
-function isArrayEquals(a=[], b=[]) {
-  if (a.length === b.length) {
-    for (let x = 0; x < a.length; x++)
-      if (a[x] != b[x]) return false;
-    return true;
-  } else return false;
+function hasChanges(a={}, b={}) {
+  for (let k in a) if (a[k] != b[k]) return true;
+  for (let k in b) if (b[k] != a[k]) return true;
+  return false;
 }
 
-function add(home) {
-  last.push(home);
-  return api.addMetadata('homes', home);
+function add(home, user_id) {
+  last[home] = user_id;
+  return api.addMetadata('homes', {home:user_id});
 }
 
 function remove(home) {
-  last = last.filter(h => h != home);
-  return api.removeMetadata('homes', home);
+  delete last[home];
+  return api.removeMetadata('homes', {home:null});
 }
 
 async function coroutine() {
-  const homes = (await db.pluck('SELECT home FROM vrp_homes_permissions WHERE `owner`=1', 'home'));
-  if (!isArrayEquals(homes.sort(), last.sort())) {
-    last = homes;
-    await api.setMetadata('homes', last);
-  }
+  const homes = {};
+
+  const rows = await db.sql('SELECT user_id,home FROM vrp_homes_permissions WHERE owner=1', [], true);
+  for (let {user_id,home} of rows)
+    homes[home] = user_id;
+
+  if (hasChanges(homes, last))
+    await api.setMetadata('homes', last = homes);
 }
 
 db.onConnect(() => {
   db.queryTables().then(() => {
-    if (db.tables().includes('vrp_homes_permissions')) {
+    const prefix = config.snowflake.database_prefix||'vrp';
+    if (db.tables().includes(prefix+'_homes_permissions')) {
       setInterval(coroutine, 10000);
-      console.log('Monitorando casas disponíveis em vrp_homes_permissions...');
+      console.log('Monitorando casas disponíveis em '+prefix+'_homes_permissions...');
     }
   }).catch(err => console.error(err))
 });
 
-module.exports = { add, remove, coroutine };
+module.exports = { add,remove,coroutine };
