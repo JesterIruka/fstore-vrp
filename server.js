@@ -199,7 +199,7 @@ RegisterCommand('fivemstore', async (source, args) => {
   }
 });
 
-if (proxy.isVRP) {
+if (proxy.isVRP && !config.plugins.includes('disable-vip-command')) {
   const cooldown = {};
 
   RegisterCommand('vip', async (source, args) => {
