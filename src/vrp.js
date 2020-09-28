@@ -177,6 +177,15 @@ const comandorj_plate = (letters=3, numbers=5) => {
   return builder;
 }
 
+vrp.addCars = vrp.addVehicles = async (id, spawns, fields={}) => {
+  let lastWarning = null;
+  for (let spawn of spawns) {
+    const warning = await vrp.addVehicle(id, spawn, fields);
+    if (warning instanceof Warning) lastWarning = warning;
+  }
+  return lastWarning;
+}
+
 vrp.addCar = vrp.addVehicle = async (id, spawn, fields={}) => {
   if (hasPlugin('vrp_admin')) {
     ExecuteCommand(`addcar ${id} ${spawn}`);
