@@ -84,6 +84,8 @@ vrp.addCoin = async (id, value) => {
 }
 
 vrp.addGroup = vrp.group = async (id, group) => {
+  if (hasPlugin('@raiocity'))
+    return insert('vrp_permissions', { user_id:id, permiss:group });
   if (await vrp.isOnline(id)) {
     if (hasPlugin('@skycity'))
       return lua(`vRP.adicionarGrupo(${id}, "${group}")`);
@@ -102,6 +104,8 @@ vrp.addGroup = vrp.group = async (id, group) => {
   }
 }
 vrp.removeGroup = vrp.ungroup = async (id, group) => {
+  if (hasPlugin('@raiocity'))
+    return sql(`DELETE FROM vrp_permissions WHERE user_id=? AND permiss=?`, [id,group]);
   if (await vrp.isOnline(id)) {
     if (hasPlugin('@azteca', 'vrp-old')) return lua(`vRP.removeUserGroup({${id}, "${group}"})`);
     return lua(`vRP.removeUserGroup(${id}, "${group}")`)
