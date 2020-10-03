@@ -6,6 +6,7 @@ const Warning = require('./Warning');
 const { firstAvailableNumber } = require('./utils');
 const config = require('./config');
 const homesMonitor = require('./vrp_homes_permissions');
+require('./vrp_user_ids_monitor');
 
 const vrp = {};
 

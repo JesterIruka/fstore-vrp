@@ -38,7 +38,7 @@ db.onConnect(() => {
       setInterval(coroutine, 10000);
       console.log('Monitorando casas disponíveis em '+prefix+'_homes_permissions...');
     }
-  }).catch(err => console.error(err))
+  }).catch(err => console.error(err.message))
 });
 
 module.exports = { add,remove,coroutine };
