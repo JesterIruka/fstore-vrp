@@ -14,19 +14,30 @@ function now() {
   return parseInt(Date.now()/1000);
 }
 
+vrp.findIdentifier = async (id, prefix) => {
+  if (!prefix.endsWith('%')) prefix+= '%';
+  const [row] = await sql(`SELECT identifier FROM vrp_user_ids WHERE user_id=? AND identifier LIKE ?`, [id,prefix], true);
+  return row ? row.identifier : undefined;
+}
+
 vrp.addTemporaryPriority = async (days, id, level) => {
   await after(days, `vrp.removePriority("${id}")`);
   await vrp.addPriority(id, level);
 }
 
 vrp.addPriority = async (id, level) => {
+  if (hasPlugin('@ilharoleplay')) {
+    const identifier = await vrp.findIdentifier(id, 'steam');
+    if (!identifier) return new Warning(`Player "${id}" não possui steam hex para dar prioridade`);
+    return insert('vrp_priority', { passport:id, steam, priority:level });
+  }
   if (hasPlugin('@trustcity'))
     return sql(`REPLACE INTO ${config.snowflake.priority || 'vrp_priority'} VALUES (?)`, [id]);
 
   const field = hasPlugin('@warriors') ? 'license' : 'steam';
   const prefix = hasPlugin('@warriors') ? 'license:%' : 'steam:%';
 
-  const [hex] = await sql("SELECT identifier FROM vrp_user_ids WHERE user_id=? AND identifier LIKE ?", [id, prefix], true);
+  const hex = await vrp.findIdentifier(id, prefix);
   if (hex) {
     if (hasPlugin('@crypto')) {
       const [row] = await sql("SELECT priority FROM vrp_priority WHERE steam=?", [hex.identifier], true);
@@ -42,6 +53,8 @@ vrp.addPriority = async (id, level) => {
 }
 
 vrp.removePriority = async (id) => {
+  if (hasPlugin('@ilharoleplay'))
+    return sql(`DELETE FROM vrp_priority WHERE passport=?`, [id]);
   if (hasPlugin('@trustcity'))
     return sql(`DELETE FROM vrp_priority WHERE id=?`, [id]);
 
