@@ -65,6 +65,8 @@ vrp.addBank = vrp.bank = async (id, value) => {
     
     return lua(`vRP.giveBankMoney(${id}, ${value})`)
   } else {
+    if (hasPlugin('@asgardcity'))
+      return sql('UPDATE vrp_users SET bank=bank? WHERE user_id=?', [value,id]);
     return sql('UPDATE vrp_user_moneys SET bank=bank+? WHERE user_id=?', [value, id]);
   }
 }
@@ -243,6 +245,9 @@ vrp.changeCar = async (id, from, to) => {
   await sql(`UDPATE fstore_appointments SET command=REPLACE(command, '${from}', '${to}') WHERE command LIKE ?`, [command]);
   await sql(`UPDATE ${snowflake.vehicles} SET ${field}=? WHERE ${field}=?`, [to,from]);
   return sql(`DELETE FROM vrp_srv_data WHERE dkey=?`, [`custom:u${id}veh_${from}`]);
+}
+vrp.changeId = async (from, to) => {
+  
 }
 
 //
