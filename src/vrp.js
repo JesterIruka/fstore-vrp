@@ -66,7 +66,7 @@ vrp.addBank = vrp.bank = async (id, value) => {
     return lua(`vRP.giveBankMoney(${id}, ${value})`)
   } else {
     if (hasPlugin('@asgardcity'))
-      return sql('UPDATE vrp_users SET bank=bank? WHERE id=?', [value,id]);
+      return sql('UPDATE vrp_users SET bank=bank+? WHERE id=?', [value,id]);
     return sql('UPDATE vrp_user_moneys SET bank=bank+? WHERE user_id=?', [value, id]);
   }
 }
