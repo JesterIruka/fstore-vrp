@@ -1,5 +1,5 @@
 const { lua } = require('./lua');
-const api = require ('./api');
+const api = require('./api');
 const { sql, pluck, insert, getDatatable, setDatatable, createAppointment, after } = require('./mysql');
 const { snowflake, hasPlugin } = require('./config');
 const Warning = require('./Warning');
@@ -11,12 +11,12 @@ require('./vrp_user_ids_monitor');
 const vrp = {};
 
 function now() {
-  return parseInt(Date.now()/1000);
+  return parseInt(Date.now() / 1000);
 }
 
 vrp.findIdentifier = async (id, prefix) => {
-  if (!prefix.endsWith('%')) prefix+= '%';
-  const [row] = await sql(`SELECT identifier FROM vrp_user_ids WHERE user_id=? AND identifier LIKE ?`, [id,prefix], true);
+  if (!prefix.endsWith('%')) prefix += '%';
+  const [row] = await sql(`SELECT identifier FROM vrp_user_ids WHERE user_id=? AND identifier LIKE ?`, [id, prefix], true);
   return row ? row.identifier : undefined;
 }
 
@@ -29,7 +29,7 @@ vrp.addPriority = async (id, level) => {
   if (hasPlugin('@ilharoleplay')) {
     const identifier = await vrp.findIdentifier(id, 'steam');
     if (!identifier) return new Warning(`Player "${id}" não possui steam hex para dar prioridade`);
-    return insert('vrp_priority', { passport:id, steam, priority:level });
+    return insert('vrp_priority', { passport: id, steam, priority: level });
   }
   if (hasPlugin('@trustcity'))
     return sql(`REPLACE INTO ${config.snowflake.priority || 'vrp_priority'} VALUES (?)`, [id]);
@@ -40,15 +40,15 @@ vrp.addPriority = async (id, level) => {
   const hex = await vrp.findIdentifier(id, prefix);
   if (hex) {
     if (hasPlugin('@crypto')) {
-      const [row] = await sql("SELECT priority FROM vrp_priority WHERE steam=?", [hex.identifier], true);
+      const [row] = await sql("SELECT priority FROM vrp_priority WHERE steam=?", [hex], true);
       if (row) {
-        return sql('UPDATE vrp_priority SET priority=? WHERE steam=?', [row.priority + level, hex.identifier]);
+        return sql('UPDATE vrp_priority SET priority=? WHERE steam=?', [row.priority + level, hex]);
       }
     }
     const table = config.snowflake.priority || 'vrp_priority';
-    return sql(`REPLACE INTO ${table} (${field},priority) VALUES (?,?)`, [hex.identifier, level]);
+    return sql(`REPLACE INTO ${table} (${field},priority) VALUES (?,?)`, [hex, level]);
   } else {
-    api.addWebhookBatch('```diff\n- Não foi possível encontrar a '+field+' de '+id+'```');
+    api.addWebhookBatch('```diff\n- Não foi possível encontrar a ' + field + ' de ' + id + '```');
   }
 }
 
@@ -66,7 +66,7 @@ vrp.removePriority = async (id) => {
     const table = config.snowflake.priority || 'vrp_priority';
     return sql(`DELETE FROM ${table} WHERE ${field}=?`, [hex.identifier]);
   } else {
-    api.addWebhookBatch('```diff\nNão foi possível encontrar '+field+' de '+id+'```');
+    api.addWebhookBatch('```diff\nNão foi possível encontrar ' + field + ' de ' + id + '```');
   }
 }
 
@@ -75,11 +75,11 @@ vrp.addBank = vrp.bank = async (id, value) => {
     if (hasPlugin('@skycity'))
       return lua(`vRP.darDinheiro(${id}, ${value})`);
     else if (hasPlugin('@azteca', 'vrp-old')) return lua(`vRP.giveBankMoney({${id}, ${value}})`);
-    
+
     return lua(`vRP.giveBankMoney(${id}, ${value})`)
   } else {
     if (hasPlugin('@asgardcity'))
-      return sql('UPDATE vrp_users SET bank=bank+? WHERE id=?', [value,id]);
+      return sql('UPDATE vrp_users SET bank=bank+? WHERE id=?', [value, id]);
     return sql('UPDATE vrp_user_moneys SET bank=bank+? WHERE user_id=?', [value, id]);
   }
 }
@@ -101,7 +101,7 @@ vrp.addCoin = async (id, value) => {
 
 vrp.addGroup = vrp.group = async (id, group) => {
   if (hasPlugin('@raiocity'))
-    return insert('vrp_permissions', { user_id:id, permiss:group });
+    return insert('vrp_permissions', { user_id: id, permiss: group });
   if (await vrp.isOnline(id)) {
     if (hasPlugin('@skycity'))
       return lua(`vRP.adicionarGrupo(${id}, "${group}")`);
@@ -115,13 +115,13 @@ vrp.addGroup = vrp.group = async (id, group) => {
       dvalue.groups[group] = true;
       return setDatatable(id, dvalue);
     } else {
-      console.error('Não foi possível encontrar o dvalue para o jogador '+id);
+      console.error('Não foi possível encontrar o dvalue para o jogador ' + id);
     }
   }
 }
 vrp.removeGroup = vrp.ungroup = async (id, group) => {
   if (hasPlugin('@raiocity'))
-    return sql(`DELETE FROM vrp_permissions WHERE user_id=? AND permiss=?`, [id,group]);
+    return sql(`DELETE FROM vrp_permissions WHERE user_id=? AND permiss=?`, [id, group]);
   if (await vrp.isOnline(id)) {
     if (hasPlugin('@azteca', 'vrp-old')) return lua(`vRP.removeUserGroup({${id}, "${group}"})`);
     return lua(`vRP.removeUserGroup(${id}, "${group}")`)
@@ -132,7 +132,7 @@ vrp.removeGroup = vrp.ungroup = async (id, group) => {
       delete dvalue.groups[group];
       return setDatatable(id, dvalue);
     } else {
-      console.error('Não foi possível encontrar o dvalue para o jogador '+id);
+      console.error('Não foi possível encontrar o dvalue para o jogador ' + id);
     }
   }
 }
@@ -148,7 +148,7 @@ vrp.getName = async (id) => {
   if (hasPlugin('@asgardcity')) {
     const [row] = await sql('SELECT * FROM vrp_users WHERE id=?', [id]);
     if (row) {
-      return row.name + ' '+ row.name2;
+      return row.name + ' ' + row.name2;
     } else return undefined;
   }
   const table = hasPlugin('name_in_vrp_users') ? 'vrp_users' : 'vrp_user_identities';
@@ -156,9 +156,9 @@ vrp.getName = async (id) => {
   const [row] = await sql(`SELECT * FROM ${table} WHERE ${field}=?`, [id]);
   if (row) {
     if (row.name !== undefined && row.firstname !== undefined) {
-      return row.name+' '+row.firstname;
+      return row.name + ' ' + row.firstname;
     } else if (row.nome && row.sobrenome) {
-      return row.nome+' '+row.sobrenome;
+      return row.nome + ' ' + row.sobrenome;
     } else return null;
   }
   return undefined;
@@ -181,23 +181,23 @@ vrp.hasPermission = (id, permission) => lua(`vRP.hasPermission(${id}, "${permiss
 //  VEÍCULOS
 //
 
-const comandorj_plate = (letters=3, numbers=5) => {
+const comandorj_plate = (letters = 3, numbers = 5) => {
   let builder = '';
   const a = 'QWERTYUIOPASDFGHJKLZXCVBNM'.split('');
-  const b = [0,1,2,3,4,5,6,7,8,9];
+  const b = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
   while (letters > 0 || numbers > 0) {
     if (Math.random() <= 0.5 && letters > 0) {
-      builder+= a[Math.floor(a.length * Math.random())];
-      letters-=1;
+      builder += a[Math.floor(a.length * Math.random())];
+      letters -= 1;
     } else if (numbers > 0) {
-      builder+= b[Math.floor(b.length * Math.random())];
-      numbers-=1;
+      builder += b[Math.floor(b.length * Math.random())];
+      numbers -= 1;
     }
   }
   return builder;
 }
 
-vrp.addCars = vrp.addVehicles = async (id, spawns, fields={}) => {
+vrp.addCars = vrp.addVehicles = async (id, spawns, fields = {}) => {
   let lastWarning = null;
   for (let spawn of spawns) {
     const warning = await vrp.addVehicle(id, spawn, fields);
@@ -206,7 +206,7 @@ vrp.addCars = vrp.addVehicles = async (id, spawns, fields={}) => {
   return lastWarning;
 }
 
-vrp.addCar = vrp.addVehicle = async (id, spawn, fields={}) => {
+vrp.addCar = vrp.addVehicle = async (id, spawn, fields = {}) => {
   if (hasPlugin('vrp_admin')) {
     ExecuteCommand(`addcar ${id} ${spawn}`);
     return;
@@ -216,14 +216,14 @@ vrp.addCar = vrp.addVehicle = async (id, spawn, fields={}) => {
   const [row] = await sql(`SELECT * FROM ${snowflake.vehicles} WHERE user_id=? AND ${field}=?`, [id, spawn], true);
   if (row) return new Warning('Este jogador já possui esse veículo');
   else {
-    const data = { user_id:id };
+    const data = { user_id: id };
     data[field] = spawn;
     if (hasPlugin('@centralroleplay')) {
       const [old] = await sql(`SELECT vtype FROM fstore_helper WHERE spawn=?`, [spawn], true);
       data['veh_type'] = old ? old.vtype : 'car';
 
       const [udata] = await sql(`SELECT registration FROM vrp_user_identities WHERE user_id=?`, [id], true);
-      data['vehicle_plate'] = 'P '+udata.registration;
+      data['vehicle_plate'] = 'P ' + udata.registration;
     }
     if (hasPlugin('@crypto') || hasPlugin('ipva')) data['ipva'] = now();
     if (hasPlugin('@americandream')) data['can_sell'] = 0;
@@ -234,7 +234,7 @@ vrp.addCar = vrp.addVehicle = async (id, spawn, fields={}) => {
       while (plates.includes(plate)) plate = comandorj_plate();
       data['plate'] = plate;
     }
-    for (let [k,v] in Object.entries(fields)) data[k]=v;
+    for (let [k, v] in Object.entries(fields)) data[k] = v;
     await insert(snowflake.vehicles, data);
   }
 }
@@ -248,7 +248,7 @@ vrp.removeScheduledCars = async (id) => {
 vrp.removeAllCars = (id) => {
   return sql(`DELETE FROM ${snowflake.vehicles} WHERE user_id=?`, [id]);
 }
-vrp.addTemporaryCar = vrp.addTemporaryVehicle = async (days, id, spawn, fields={}) => {
+vrp.addTemporaryCar = vrp.addTemporaryVehicle = async (days, id, spawn, fields = {}) => {
   await after(days, `vrp.removeVehicle("${id}", "${spawn}")`);
   return vrp.addVehicle(id, spawn, fields);
 }
@@ -256,11 +256,11 @@ vrp.changeCar = async (id, from, to) => {
   const field = hasPlugin('@comandorj') ? 'model' : 'vehicle';
   const command = `vrp.removeVehicle("${id}"%`;
   await sql(`UDPATE fstore_appointments SET command=REPLACE(command, '${from}', '${to}') WHERE command LIKE ?`, [command]);
-  await sql(`UPDATE ${snowflake.vehicles} SET ${field}=? WHERE ${field}=?`, [to,from]);
+  await sql(`UPDATE ${snowflake.vehicles} SET ${field}=? WHERE ${field}=?`, [to, from]);
   return sql(`DELETE FROM vrp_srv_data WHERE dkey=?`, [`custom:u${id}veh_${from}`]);
 }
 vrp.changeId = async (from, to) => {
-  
+
 }
 
 //
@@ -268,7 +268,7 @@ vrp.changeId = async (from, to) => {
 //
 
 vrp.addHome = vrp.addHouse = async (id, home) => {
-  const [row] = await sql("SELECT number FROM vrp_user_homes WHERE user_id=? AND home=?", [id,home], true)
+  const [row] = await sql("SELECT number FROM vrp_user_homes WHERE user_id=? AND home=?", [id, home], true)
   if (row) return new Warning("Este jogador já possui esta casa");
 
   let numbers = await pluck("SELECT number FROM vrp_user_homes WHERE home=?", 'number', [home]);
@@ -304,7 +304,7 @@ vrp.addHomePermission = vrp.addHousePermission = async (id, prefix) => {
   /* CASAS ALEATÓRIAS COM PRIMEIRA DISPONIBILIDADE (LEGADO) */
   let occupied = await pluck(`SELECT home FROM vrp_homes_permissions WHERE home LIKE '${prefix}%'`, 'home');
   const higher = firstAvailableNumber(occupied.map(s => parseInt(s.substring(prefix.length))));
-  const home = prefix+(higher.toString().padStart(2, '0'));
+  const home = prefix + (higher.toString().padStart(2, '0'));
 
   const data = { user_id: id, home, owner: 1, garage: 1 };
   if (hasPlugin('@crypto') || hasPlugin('home-tax')) data['tax'] = now();
@@ -318,7 +318,7 @@ vrp.removeHomePermission = vrp.removeHousePermission = async (id, prefix) => {
     await sql('UPDATE vrp_srv_data SET dvalue=? WHERE dkey LIKE ?', ['{}', `%:${prefix}`]);
     return sql('DELETE FROM vrp_homes_permissions WHERE home = ?', [prefix]);
   }
-  return sql('DELETE FROM vrp_homes_permissions WHERE user_id=? AND home LIKE ?', [id, prefix+'%']);
+  return sql('DELETE FROM vrp_homes_permissions WHERE user_id=? AND home LIKE ?', [id, prefix + '%']);
 }
 vrp.addTemporaryHousePermission = vrp.addTemporaryHomePermission = async (days, id, prefix) => {
   await after(days, `vrp.removeHousePermission("${id}", "${prefix}")`);
