@@ -290,14 +290,15 @@ vrp.addTemporaryHouse = vrp.addTemporaryHome = async (days, id, house) => {
 
 vrp.addHomePermission = vrp.addHousePermission = async (id, prefix) => {
   if (prefix.length > 2) {
-    const [row] = await sql(`SELECT user_id,home FROM vrp_homes_permissions WHERE home=? AND owner=1`, [prefix], true);
+    const table = config.snowflake.homes || 'vrp_homes_permissions';
+    const [row] = await sql(`SELECT user_id,home FROM ${table} WHERE home=? AND owner=1`, [prefix], true);
     if (row) {
       if (row.user_id == id) return new Warning('O jogador já possui a casa (Renovando...)');
       return new Warning(`A casa ${prefix} já está ocupada por um jogador diferente`);
     }
     const data = { user_id: id, home: prefix, owner: 1, garage: 1, tax: now() };
     if (hasPlugin('home-no-tax')) delete data['tax'];
-    await insert('vrp_homes_permissions', data);
+    await insert(table, data);
     await homesMonitor.add(prefix, id);
     return prefix;
   }
