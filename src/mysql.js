@@ -116,7 +116,16 @@ const findAppointment = async (command) => {
 
 module.exports.getDatatable = async (id) => {
   const [row] = await sql("SELECT dvalue FROM vrp_user_data WHERE user_id=? AND (dkey='vRP:datatable' OR dkey='Datatable')", [id], true);
-  return row ? JSON.parse(row.dvalue) : null; 
+  
+  if (row) {
+    try {
+      return JSON.parse(row.dvalue);
+    } catch (err) {
+      throw new Error('Datatable com formato incorreto: '+id+'-vRP:datatable');
+    }
+  } else {
+    return null;
+  }
 }
 
 module.exports.setDatatable = (id, value) => {
