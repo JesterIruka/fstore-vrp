@@ -93,7 +93,7 @@ vrp.addWallet = vrp.money = async (id, value) => {
 }
 vrp.addCoin = async (id, value) => {
   if (await vrp.isOnline(id)) {
-    return lua(`vRP.giveBankCoin(${id}, ${value})`);
+    return lua(`vRP.giveCoin(${id}, ${value})`);
   } else {
     return sql('UPDATE vrp_user_moneys SET coins=coins+? WHERE user_id=?', [value, id]);
   }
